@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
+		<PackageId>Honoo.Net.UPnP</PackageId>
+		<ProductName>Honoo.Net.UPnP</ProductName>
+		<Company>Loki Honoo</Company>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Copyright>Copyright (C) Loki Honoo 2021. All rights reserved.</Copyright>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>Honoo.Net.UPnP.snk</AssemblyOriginatorKeyFile>
+		<Authors>Loki Honoo</Authors>
+		<Description>Simple UPNP. Provides port mapping, DLNA e.g..</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</RepositoryUrl>
+		<PackageTags>Honoo UPnP PortMapping DLNA</PackageTags>
+		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
+		<RootNamespace>Honoo.Net</RootNamespace>
+		<Version>1.0.1</Version>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<OutputPath>..\bin\Debug</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<OutputPath>..\bin\Release</OutputPath>
+		<DocumentationFile>..\bin\Release\$(TargetFramework)\$(PackageId).xml</DocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+
+</Project>
