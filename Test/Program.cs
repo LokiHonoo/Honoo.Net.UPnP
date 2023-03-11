@@ -7,19 +7,6 @@ namespace Test
 {
     internal class Program
     {
-        private static void EventSubscriptionCallback(UPnPEventMessage[] messages)
-        {
-            foreach (var message in messages)
-            {
-                Console.WriteLine(DateTime.Now + " ====================================================");
-                Console.WriteLine(message.InstanceID);
-                foreach (KeyValuePair<string, string> change in message.Changes)
-                {
-                    Console.WriteLine(change.Key + ":" + change.Value);
-                }
-            }
-        }
-
         private static void Main(string[] args)
         {
             //TestPortMapping();
@@ -44,17 +31,17 @@ namespace Test
             //Console.WriteLine(service.GetCurrentTransportActions(0));
 
             // Need setup firewall. Administrator privileges are required.
-            UPnPDlnaServer server = new UPnPDlnaServer("http://192.168.18.11:8080/");
+            UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.11:8080/"));
 
-            //string callbackUrl = server.AddEventSubscriber(EventSubscriptionCallback);
+            //string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventUpdated);
             //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
-            string mediaUrl = server.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
+            string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
             service.SetAVTransportURI(0, mediaUrl, string.Empty);
             service.Play(0, "1");
             Console.ReadKey(true);
             service.Stop(0);
-            server.Dispose();
+            mediaServer.Dispose();
 
             //service.RemoveEventSubscription(sid);
         }
@@ -84,6 +71,19 @@ namespace Test
             service.DeletePortMapping("TCP", 4788);
 
             Console.ReadKey(true);
+        }
+
+        private static void UPnPEventUpdated(UPnPEventMessage[] messages)
+        {
+            foreach (var message in messages)
+            {
+                Console.WriteLine(DateTime.Now + " ====================================================");
+                Console.WriteLine(message.InstanceID);
+                foreach (KeyValuePair<string, string> change in message.Changes)
+                {
+                    Console.WriteLine(change.Key + ":" + change.Value);
+                }
+            }
         }
     }
 }

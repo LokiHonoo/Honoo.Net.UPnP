@@ -2,11 +2,10 @@
 
 - [Honoo.Net.UPnP](#honoonetupnp)
   - [INTRODUCTION](#introduction)
-  - [TODO](#todo)
-  - [CHANGELOG](#changelog)
-    - [1.0.0](#100)
-  - [USAGE](#usage)
+  - [PROJECT](#project)
+    - [Github](#github)
     - [NuGet](#nuget)
+  - [USAGE](#usage)
     - [Namespace](#namespace)
     - [Example-PortMapping](#example-portmapping)
     - [Example-DLNA](#example-dlna)
@@ -16,21 +15,17 @@
 
 Simple UPnP. Provides port mapping, DLNA e.g..
 
-## TODO
+## PROJECT
 
-More DLNA functions implementations.
+### Github
 
-## CHANGELOG
-
-### 1.0.0
-
-*First version.
-
-## USAGE
+<https://github.com/LokiHonoo/Honoo.Net.UPnP/>
 
 ### NuGet
 
 <https://www.nuget.org/packages/Honoo.Net.UPnP/>
+
+## USAGE
 
 ### Namespace
 
@@ -94,17 +89,17 @@ private static void TestDlna()
     //Console.WriteLine(service.GetCurrentTransportActions(0));
 
     // Need setup firewall. Administrator privileges are required.
-    UPnPDlnaServer server = new UPnPDlnaServer("http://192.168.1.11:8080/");
+    UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.1.10:8080/"));
 
-    //string callbackUrl = server.AddEventSubscriber(EventSubscriptionCallback);
+    //string callbackUrl = server.AddEventSubscriber(UPnPEventUpdated);
     //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
-    string mediaUrl = server.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
+    string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
     service.SetAVTransportURI(0, mediaUrl, string.Empty);
     service.Play(0, "1");
     Console.ReadKey(true);
     service.Stop(0);
-    server.Dispose();
+    mediaServer.Dispose();
 
     //service.RemoveEventSubscription(sid);
 }
@@ -113,4 +108,4 @@ private static void TestDlna()
 
 ## LICENSE
 
-This project is based on MIT.
+This project based on [MIT](LICENSE) license.

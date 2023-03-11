@@ -8,46 +8,36 @@ using System.Xml;
 namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP DLNA server. Administrator privileges are required.
+    /// UPnP DLNA media server.
+    /// <br/>Administrator privileges are required.
     /// </summary>
     public sealed class UPnPDlnaServer : IDisposable
     {
         #region Properties
 
-        private readonly Dictionary<string, EventSubscriptionCallback> _eventSubscribers = new Dictionary<string, EventSubscriptionCallback>();
+        private readonly Dictionary<string, UPnPEventUpdatedCallback> _eventSubscribers = new Dictionary<string, UPnPEventUpdatedCallback>();
         private readonly string _host;
         private readonly HttpListener _listener;
-        private readonly Dictionary<string, string> _medias = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
         private int _counter = 0;
         private bool _disposed = false;
 
         #endregion Properties
-
-        #region Delegate
-
-        /// <summary>
-        /// Event subscription callback.
-        /// </summary>
-        /// <param name="messages">Event subscription response messages.</param>
-        public delegate void EventSubscriptionCallback(UPnPEventMessage[] messages);
-
-        #endregion Delegate
 
         #region Construction
 
         /// <summary>
         /// Initializes a new instance of the UPnPDlnaServer class.
         /// </summary>
-        /// <param name="localHost">Create HttpListener by the local host.</param>
-        public UPnPDlnaServer(string localHost)
+        /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. http://192.168.1.100:8080 .</param>
+        public UPnPDlnaServer(Uri localHost)
         {
-            Uri uri = new Uri(localHost);
-            _host = uri.AbsoluteUri;
+            _host = localHost.AbsoluteUri;
             _listener = new HttpListener
             {
                 AuthenticationSchemes = AuthenticationSchemes.Anonymous
             };
-            _listener.Prefixes.Add(uri.AbsoluteUri);
+            _listener.Prefixes.Add(_host);
             _listener.Start();
             _listener.BeginGetContext(GottenContext, null);
         }
@@ -80,7 +70,7 @@ namespace Honoo.Net
                 if (disposing)
                 {
                     _eventSubscribers.Clear();
-                    _medias.Clear();
+                    _media.Clear();
                 }
                 try
                 {
@@ -104,11 +94,11 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Add a event subscriber to event subscriber manager and gets event subscriber url.
+        /// Add a event subscriber and gets event subscriber url.
         /// </summary>
-        /// <param name="callback">Event subscription callback.</param>
+        /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
-        public string AddEventSubscriber(EventSubscriptionCallback callback)
+        public string AddEventSubscriber(UPnPEventUpdatedCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
             string url = uri.AbsoluteUri.ToLowerInvariant();
@@ -118,25 +108,28 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Add a media file to media manager and gets transport url.
+        /// Add a media file and gets transport url.
         /// </summary>
         /// <param name="file">Local file full path to play.</param>
-        /// <param name="checkExists">Check file exists.</param>
+        /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
-        public string AddMedia(string file, bool checkExists = true)
+        public string AddMedia(string file, bool checkFileExists = true)
         {
-            if (checkExists && !File.Exists(file))
+            if (checkFileExists && !File.Exists(file))
             {
                 throw new IOException("File not exists.");
             }
             Uri uri = new Uri(_host + file.Replace(":", string.Empty).Replace("\\", "/"));
             string url = uri.AbsoluteUri.ToLowerInvariant();
-            _medias.Add(url, file);
+            if (!_media.ContainsKey(url))
+            {
+                _media.Add(url, file);
+            }
             return url;
         }
 
         /// <summary>
-        /// Removes all event subscribers from the event subscriber manager.
+        /// Removes all event subscribers.
         /// </summary>
         public void ClearEventSubscribers()
         {
@@ -144,11 +137,11 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Removes all medias from the media manager.
+        /// Removes all media.
         /// </summary>
-        public void ClearMedias()
+        public void ClearMedia()
         {
-            _medias.Clear();
+            _media.Clear();
         }
 
         /// <summary>
@@ -160,7 +153,7 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Removes specified event subscriber from the event subscriber manager.
+        /// Removes specified event subscriber.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
         public void RemoveEventSubscriber(string url)
@@ -169,12 +162,12 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Removes specified media from the media manager.
+        /// Removes specified media.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
         public void RemoveMedia(string url)
         {
-            _medias.Remove(url);
+            _media.Remove(url);
         }
 
         /// <summary>
@@ -189,6 +182,17 @@ namespace Honoo.Net
             }
         }
 
+        /// <summary>
+        /// This instance is not allowed to receive incoming requests.
+        /// </summary>
+        public void Stop()
+        {
+            if (_listener.IsListening)
+            {
+                _listener.Stop();
+            }
+        }
+
         private void GottenContext(IAsyncResult ar)
         {
             HttpListenerContext context;
@@ -198,7 +202,7 @@ namespace Honoo.Net
                 _listener.BeginGetContext(GottenContext, null);
 
                 string url = context.Request.Url.AbsoluteUri.ToLowerInvariant();
-                if (_eventSubscribers.TryGetValue(url, out EventSubscriptionCallback callback))
+                if (_eventSubscribers.TryGetValue(url, out UPnPEventUpdatedCallback callback))
                 {
                     byte[] buffer = new byte[context.Request.ContentLength64];
                     context.Request.InputStream.Read(buffer, 0, buffer.Length);
@@ -222,7 +226,7 @@ namespace Honoo.Net
                     }
                     callback?.Invoke(messages.ToArray());
                 }
-                else if (_medias.TryGetValue(url, out string file))
+                else if (_media.TryGetValue(url, out string file))
                 {
                     using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
