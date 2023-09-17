@@ -17,7 +17,7 @@
 		<PackageTags>Honoo;UPnP;PortMapping;DLNA</PackageTags>
 		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
 		<RootNamespace>Honoo.Net</RootNamespace>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 

@@ -15,7 +15,7 @@ namespace Honoo.Net
     {
         #region Properties
 
-        private readonly Dictionary<string, UPnPEventUpdatedCallback> _eventSubscribers = new Dictionary<string, UPnPEventUpdatedCallback>();
+        private readonly Dictionary<string, UPnPEventCallback> _eventSubscribers = new Dictionary<string, UPnPEventCallback>();
         private readonly string _host;
         private readonly HttpListener _listener;
         private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
@@ -98,7 +98,7 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
-        public string AddEventSubscriber(UPnPEventUpdatedCallback callback)
+        public string AddEventSubscriber(UPnPEventCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
             string url = uri.AbsoluteUri.ToLowerInvariant();
@@ -202,7 +202,7 @@ namespace Honoo.Net
                 _listener.BeginGetContext(GottenContext, null);
 
                 string url = context.Request.Url.AbsoluteUri.ToLowerInvariant();
-                if (_eventSubscribers.TryGetValue(url, out UPnPEventUpdatedCallback callback))
+                if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
                 {
                     byte[] buffer = new byte[context.Request.ContentLength64];
                     context.Request.InputStream.Read(buffer, 0, buffer.Length);

@@ -33,7 +33,7 @@ namespace Test
             // Need setup firewall. Administrator privileges are required.
             UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.11:8080/"));
 
-            //string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventUpdated);
+            //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventHandler);
             //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
@@ -44,6 +44,7 @@ namespace Test
             mediaServer.Dispose();
 
             //service.RemoveEventSubscription(sid);
+            //mediaServer.RemoveEventSubscriber(callbackUrl);
         }
 
         private static void TestPortMapping()
@@ -73,7 +74,7 @@ namespace Test
             Console.ReadKey(true);
         }
 
-        private static void UPnPEventUpdated(UPnPEventMessage[] messages)
+        private static void DlanEventHandler(UPnPEventMessage[] messages)
         {
             foreach (var message in messages)
             {
