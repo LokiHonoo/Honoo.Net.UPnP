@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Honoo.Net
+namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP event subscription response message.

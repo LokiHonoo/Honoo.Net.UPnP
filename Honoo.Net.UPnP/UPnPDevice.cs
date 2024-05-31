@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Honoo.Net
+namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP device.

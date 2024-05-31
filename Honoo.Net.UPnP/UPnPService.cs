@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net
+namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP service. Convert to the interface "IUPnPPortService", "IUPnPDlnaService" to call the relevant method.

@@ -1,4 +1,4 @@
-﻿using Honoo.Net;
+﻿using Honoo.Net.UPnP;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -7,6 +7,19 @@ namespace Test
 {
     internal class Program
     {
+        private static void DlanEventHandler(UPnPEventMessage[] messages)
+        {
+            foreach (var message in messages)
+            {
+                Console.WriteLine(DateTime.Now + " ====================================================");
+                Console.WriteLine(message.InstanceID);
+                foreach (KeyValuePair<string, string> change in message.Changes)
+                {
+                    Console.WriteLine(change.Key + ":" + change.Value);
+                }
+            }
+        }
+
         private static void Main(string[] args)
         {
             //TestPortMapping();
@@ -16,7 +29,7 @@ namespace Test
 
         private static void TestDlna()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(2000, UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1, 2000);
             UPnPRootDevice dlna = devices[0];
 
             //Console.WriteLine(((IUPnPMediaRendererDevice)dlna.Device).XDlnaDoc);
@@ -33,7 +46,7 @@ namespace Test
             // Need setup firewall. Administrator privileges are required.
             UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.11:8080/"));
 
-            //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventHandler);
+            string callbackUrl = mediaServer.AddEventSubscriber(DlanEventHandler);
             //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
@@ -49,7 +62,7 @@ namespace Test
 
         private static void TestPortMapping()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(2000, UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1, 2000);
             UPnPRootDevice router = devices[0];
             IUPnPWANIPConnectionService service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
@@ -72,19 +85,6 @@ namespace Test
             service.DeletePortMapping("TCP", 4788);
 
             Console.ReadKey(true);
-        }
-
-        private static void DlanEventHandler(UPnPEventMessage[] messages)
-        {
-            foreach (var message in messages)
-            {
-                Console.WriteLine(DateTime.Now + " ====================================================");
-                Console.WriteLine(message.InstanceID);
-                foreach (KeyValuePair<string, string> change in message.Changes)
-                {
-                    Console.WriteLine(change.Key + ":" + change.Value);
-                }
-            }
         }
     }
 }

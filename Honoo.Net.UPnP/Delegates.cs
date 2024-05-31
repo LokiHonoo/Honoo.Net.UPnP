@@ -1,4 +1,4 @@
-﻿namespace Honoo.Net
+﻿namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP event updated callback.

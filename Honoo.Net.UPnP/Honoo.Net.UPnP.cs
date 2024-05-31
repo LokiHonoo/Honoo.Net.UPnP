@@ -27,7 +27,7 @@
 //using System.Threading.Tasks;
 //using System.Xml;
 
-//namespace Honoo.Net
+//namespace Honoo.Net.UPnP
 //{
 //    /// <summary>
 //    /// UPnP.

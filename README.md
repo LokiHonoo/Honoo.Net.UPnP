@@ -2,46 +2,41 @@
 
 - [Honoo.Net.UPnP](#honoonetupnp)
   - [INTRODUCTION](#introduction)
-  - [PROJECT](#project)
-    - [Github](#github)
-    - [NuGet](#nuget)
   - [USAGE](#usage)
+    - [NuGet](#nuget)
+  - [QUICK START](#quick-start)
     - [Namespace](#namespace)
-    - [Example-PortMapping](#example-portmapping)
-    - [Example-DLNA](#example-dlna)
+    - [PortMapping](#portmapping)
+    - [DLNA](#dlna)
   - [LICENSE](#license)
 
 ## INTRODUCTION
 
 Simple UPnP. Provides port mapping, DLNA e.g..
 
-## PROJECT
-
-### Github
-
-<https://github.com/LokiHonoo/Honoo.Net.UPnP/>
+## USAGE
 
 ### NuGet
 
 <https://www.nuget.org/packages/Honoo.Net.UPnP/>
 
-## USAGE
+## QUICK START
 
 ### Namespace
 
 ```c#
 
-using Honoo.Net;
+using Honoo.Net.UPnP;
 
 ```
 
-### Example-PortMapping
+### PortMapping
 
 ```c#
 
 private static void TestPortMapping()
 {
-    UPnPRootDevice[] devices = UPnP.Discover(2000, UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1, 2000);
     UPnPRootDevice router = devices[0];
     IUPnPWANIPConnectionService service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
@@ -68,13 +63,13 @@ private static void TestPortMapping()
 
 ```
 
-### Example-DLNA
+### DLNA
 
 ```c#
 
 private static void TestDlna()
 {
-    UPnPRootDevice[] devices = UPnP.Discover(2000, UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1, 2000);
     UPnPRootDevice dlna = devices[0];
 
     //Console.WriteLine(((IUPnPMediaRendererDevice)dlna.Device).XDlnaDoc);
@@ -109,4 +104,4 @@ private static void TestDlna()
 
 ## LICENSE
 
-This project based on [MIT](LICENSE) license.
+[MIT](LICENSE) license.

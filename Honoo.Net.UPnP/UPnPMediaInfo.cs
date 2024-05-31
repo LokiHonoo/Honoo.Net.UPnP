@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Xml;
 
-namespace Honoo.Net
+namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP media info.

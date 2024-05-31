@@ -4,10 +4,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Honoo.Net
+namespace Honoo.Net.UPnP
 {
     /// <summary>
-    /// UPnP.
+    /// UPnP discoverer.
     /// </summary>
     public static class UPnP
     {
@@ -102,16 +102,16 @@ namespace Honoo.Net
         /// <summary>
         /// Discover UPnP devices.
         /// </summary>
-        /// <param name="duration">Search duration. unit is milliseconds.</param>
-        /// <param name="searchTarget">Http header "ST".</param>
+        /// <param name="searchTarget">Http header "ST". Look this: <see cref="UPNP_ROOT_DEVICE"/> and so on.</param>
+        /// <param name="durationMilliseconds">Search duration. unit is milliseconds.</param>
         /// <returns></returns>
-        public static UPnPRootDevice[] Discover(int duration = 2000, string searchTarget = "upnp:rootdevice")
+        public static UPnPRootDevice[] Discover(string searchTarget = UPNP_ROOT_DEVICE, int durationMilliseconds = 2000)
         {
             List<UPnPRootDevice> rootDevices = new List<UPnPRootDevice>();
             List<string> responses = new List<string>();
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                socket.ReceiveTimeout = duration;
+                socket.ReceiveTimeout = durationMilliseconds;
                 socket.EnableBroadcast = true;
                 socket.MulticastLoopback = false;
                 socket.Bind(new IPEndPoint(IPAddress.Any, 0));
