@@ -1,4 +1,6 @@
-﻿namespace Honoo.Net.UPnP
+﻿using System.Collections.Generic;
+
+namespace Honoo.Net.UPnP
 {
     /// <summary>
     /// UPnP device interface.
@@ -8,7 +10,7 @@
         /// <summary>
         /// Child devices.
         /// </summary>
-        UPnPDevice[] Devices { get; }
+        ICollection<UPnPDevice> Devices { get; }
 
         /// <summary>
         /// Device type.
@@ -23,7 +25,7 @@
         /// <summary>
         /// Icons.
         /// </summary>
-        UPnPIcon[] Icons { get; }
+        ICollection<UPnPIcon> Icons { get; }
 
         /// <summary>
         /// Manufacturer.
@@ -33,6 +35,7 @@
         /// <summary>
         /// Manufacturer url.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         string ManufacturerUrl { get; }
 
         /// <summary>
@@ -53,6 +56,7 @@
         /// <summary>
         /// Model url.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         string ModelUrl { get; }
 
         /// <summary>
@@ -73,7 +77,7 @@
         /// <summary>
         /// Services.
         /// </summary>
-        UPnPService[] Services { get; }
+        ICollection<UPnPService> Services { get; }
 
         /// <summary>
         /// Unique device name.

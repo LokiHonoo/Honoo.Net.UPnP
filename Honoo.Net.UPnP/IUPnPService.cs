@@ -11,11 +11,13 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Control url.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         string ControlUrl { get; }
 
         /// <summary>
         /// Event sub url.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         string EventSubUrl { get; }
 
         /// <summary>
@@ -31,6 +33,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Scpd url.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         string ScpdUrl { get; }
 
         /// <summary>
@@ -83,6 +86,7 @@ namespace Honoo.Net.UPnP
         /// <param name="durationSecond">Subscription duration. Unit is second.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         string SetEventSubscription(string subscriberUrl, uint durationSecond);
     }
 }

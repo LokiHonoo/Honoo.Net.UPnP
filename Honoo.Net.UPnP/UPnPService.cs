@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Xml;
@@ -26,7 +27,7 @@ namespace Honoo.Net.UPnP
         private readonly string _scpdUrl;
         private readonly string _serviceID;
         private readonly string _serviceType;
-        private bool _indicateEnvelope = false;
+        private bool _indicateEnvelope;
 
         /// <summary>
         /// Control url.
@@ -282,12 +283,12 @@ namespace Honoo.Net.UPnP
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
                 new KeyValuePair<string, string>("NewRemoteHost", string.Empty),
-                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString()),
+                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewInternalClient", internalClient.ToString()),
-                new KeyValuePair<string, string>("NewInternalPort", internalPort.ToString()),
+                new KeyValuePair<string, string>("NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewEnabled", enabled ? "1" : "0"),
                 new KeyValuePair<string, string>("NewPortMappingDescription", description),
-                new KeyValuePair<string, string>("NewLeaseDuration", leaseDuration.ToString())
+                new KeyValuePair<string, string>("NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("AddAnyPortMapping", arguments);
             XmlDocument doc = new XmlDocument();
@@ -296,7 +297,7 @@ namespace Honoo.Net.UPnP
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
             ns.AddNamespace("u", _serviceType);
             XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:AddAnyPortMappingResponse", ns);
-            return ushort.Parse(node.SelectSingleNode("NewReservedPort").InnerText.Trim());
+            return ushort.Parse(node.SelectSingleNode("NewReservedPort").InnerText.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -325,12 +326,12 @@ namespace Honoo.Net.UPnP
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
                 new KeyValuePair<string, string>("NewRemoteHost", string.Empty),
-                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString()),
+                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewInternalClient", internalClient.ToString()),
-                new KeyValuePair<string, string>("NewInternalPort", internalPort.ToString()),
+                new KeyValuePair<string, string>("NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewEnabled", enabled ? "1" : "0"),
                 new KeyValuePair<string, string>("NewPortMappingDescription", description),
-                new KeyValuePair<string, string>("NewLeaseDuration", leaseDuration.ToString())
+                new KeyValuePair<string, string>("NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("AddPortMapping", arguments);
         }
@@ -346,7 +347,7 @@ namespace Honoo.Net.UPnP
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
                 new KeyValuePair<string, string>("NewRemoteHost", string.Empty),
-                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString())
+                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("DeletePortMapping", arguments);
         }
@@ -363,8 +364,8 @@ namespace Honoo.Net.UPnP
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
-                new KeyValuePair<string, string>("NewStartPort", startPort.ToString()),
-                new KeyValuePair<string, string>("NewEndPort", endPort.ToString()),
+                new KeyValuePair<string, string>("NewStartPort", startPort.ToString(CultureInfo.InvariantCulture)),
+                new KeyValuePair<string, string>("NewEndPort", endPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewManage", manage ? "1" : "0")
             };
             PostAction("DeletePortMappingRange", arguments);
@@ -422,7 +423,7 @@ namespace Honoo.Net.UPnP
         UPnPPortMappingEntry IUPnPWANConnectionService.GetGenericPortMappingEntry(uint index)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("NewPortMappingIndex", index.ToString())
+                new KeyValuePair<string, string>("NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetGenericPortMappingEntry", arguments);
             XmlDocument doc = new XmlDocument();
@@ -447,8 +448,8 @@ namespace Honoo.Net.UPnP
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
-                new KeyValuePair<string, string>("NewStartPort", startPort.ToString()),
-                new KeyValuePair<string, string>("NewEndPort", endPort.ToString()),
+                new KeyValuePair<string, string>("NewStartPort", startPort.ToString(CultureInfo.InvariantCulture)),
+                new KeyValuePair<string, string>("NewEndPort", endPort.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("NewManage", manage ? "1" : "0"),
                 new KeyValuePair<string, string>("NewNumberOfPorts", "65535")
             };
@@ -491,7 +492,7 @@ namespace Honoo.Net.UPnP
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
                 new KeyValuePair<string, string>("NewRemoteHost", string.Empty),
-                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString())
+                new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetSpecificPortMappingEntry", arguments);
             XmlDocument doc = new XmlDocument();
@@ -555,7 +556,7 @@ namespace Honoo.Net.UPnP
         string IUPnPAVTransportService.GetCurrentTransportActions(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetCurrentTransportActions", arguments);
             XmlDocument doc = new XmlDocument();
@@ -576,7 +577,7 @@ namespace Honoo.Net.UPnP
         UPnPDeviceCapabilities IUPnPAVTransportService.GetDeviceCapabilities(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetDeviceCapabilities", arguments);
             XmlDocument doc = new XmlDocument();
@@ -597,7 +598,7 @@ namespace Honoo.Net.UPnP
         UPnPMediaInfo IUPnPAVTransportService.GetMediaInfo(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetMediaInfo", arguments);
             XmlDocument doc = new XmlDocument();
@@ -618,7 +619,7 @@ namespace Honoo.Net.UPnP
         UPnPPositionInfo IUPnPAVTransportService.GetPositionInfo(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetPositionInfo", arguments);
             XmlDocument doc = new XmlDocument();
@@ -639,7 +640,7 @@ namespace Honoo.Net.UPnP
         UPnPTransportInfo IUPnPAVTransportService.GetTransportInfo(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetTransportInfo", arguments);
             XmlDocument doc = new XmlDocument();
@@ -660,7 +661,7 @@ namespace Honoo.Net.UPnP
         UPnPTransportSettings IUPnPAVTransportService.GetTransportSettings(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetTransportSettings", arguments);
             XmlDocument doc = new XmlDocument();
@@ -680,7 +681,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Next(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("Next", arguments);
         }
@@ -693,7 +694,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Pause(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("Pause", arguments);
         }
@@ -707,7 +708,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Play(uint instanceID, string speed)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString()),
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("Speed", speed)
             };
             PostAction("Play", arguments);
@@ -721,7 +722,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Previous(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("Previous", arguments);
         }
@@ -736,7 +737,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Seek(uint instanceID, string unit, string target)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString()),
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("Unit", unit),
                 new KeyValuePair<string, string>("Target", target)
             };
@@ -754,7 +755,7 @@ namespace Honoo.Net.UPnP
         {
             currentURI = $"<![CDATA[{currentURI}]]>";
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString()),
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("CurrentURI", currentURI),
                 new KeyValuePair<string, string>("CurrentURIMetaData", currentURIMetaData)
             };
@@ -771,7 +772,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.SetPlayMode(uint instanceID, string playMode)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString()),
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture)),
                 new KeyValuePair<string, string>("PlayMode", playMode)
             };
             PostAction("SetPlayMode", arguments);
@@ -785,7 +786,7 @@ namespace Honoo.Net.UPnP
         void IUPnPAVTransportService.Stop(uint instanceID)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
-                new KeyValuePair<string, string>("InstanceID", instanceID.ToString())
+                new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             PostAction("Stop", arguments);
         }

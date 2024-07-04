@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -32,7 +33,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Child devices.
         /// </summary>
-        public UPnPDevice[] Devices => _devices;
+        public ICollection<UPnPDevice> Devices => _devices;
 
         /// <summary>
         /// Device type.
@@ -47,7 +48,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Icons.
         /// </summary>
-        public UPnPIcon[] Icons => _icons;
+        public ICollection<UPnPIcon> Icons => _icons;
 
         /// <summary>
         /// Manufacturer.
@@ -97,7 +98,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Services.
         /// </summary>
-        public UPnPService[] Services => _services;
+        public ICollection<UPnPService> Services => _services;
 
         /// <summary>
         /// Unique device name.
@@ -186,7 +187,7 @@ namespace Honoo.Net.UPnP
         internal UPnPDevice FindDevice(string deviceType)
         {
             UPnPDevice result = null;
-            if (_deviceType.Equals(deviceType, StringComparison.InvariantCultureIgnoreCase))
+            if (_deviceType.Equals(deviceType, StringComparison.OrdinalIgnoreCase))
             {
                 result = this;
             }
@@ -214,7 +215,7 @@ namespace Honoo.Net.UPnP
             UPnPService result = null;
             foreach (UPnPService service in _services)
             {
-                if (service.ServiceType.Equals(serviceType, StringComparison.InvariantCultureIgnoreCase))
+                if (service.ServiceType.Equals(serviceType, StringComparison.OrdinalIgnoreCase))
                 {
                     result = service;
                     break;

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -23,11 +24,13 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Current audio/video transport uri.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string CurrentURI => _currentURI;
 
         /// <summary>
         /// Current audio/video transport uri meta data.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string CurrentURIMetaData => _currentURIMetaData;
 
         /// <summary>
@@ -38,11 +41,13 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Next audio/video transport uri.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string NextURI => _nextURI;
 
         /// <summary>
         /// Next audio/video transport uri meta data.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string NextURIMetaData => _nextURIMetaData;
 
         /// <summary>
@@ -73,7 +78,7 @@ namespace Honoo.Net.UPnP
         /// <param name="node">Response node.</param>
         internal UPnPMediaInfo(XmlNode node)
         {
-            _nrTracks = uint.Parse(node.SelectSingleNode("NrTracks").InnerText.Trim());
+            _nrTracks = uint.Parse(node.SelectSingleNode("NrTracks").InnerText.Trim(), CultureInfo.InvariantCulture);
             _mediaDuration = node.SelectSingleNode("MediaDuration").InnerText.Trim();
             _currentURI = node.SelectSingleNode("CurrentURI").InnerText.Trim();
             _currentURIMetaData = node.SelectSingleNode("CurrentURIMetaData").InnerText.Trim();

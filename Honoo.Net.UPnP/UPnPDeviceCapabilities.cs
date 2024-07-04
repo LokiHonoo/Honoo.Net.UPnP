@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -27,7 +28,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Record quality modes.
         /// </summary>
-        public string[] RecQualityModes => _recQualityModes;
+        public ICollection<string> RecQualityModes => _recQualityModes;
 
         #endregion Properties
 

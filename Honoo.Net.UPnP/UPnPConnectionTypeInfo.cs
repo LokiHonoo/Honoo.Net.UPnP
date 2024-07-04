@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -21,7 +22,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Possible connection types. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".
         /// </summary>
-        public string[] PossibleConnectionTypes => _possibleConnectionTypes;
+        public ICollection<string> PossibleConnectionTypes => _possibleConnectionTypes;
 
         #endregion Properties
 

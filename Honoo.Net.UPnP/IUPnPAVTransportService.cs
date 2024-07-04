@@ -60,6 +60,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <exception cref="Exception"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:标识符不应与关键字匹配", Justification = "<挂起>")]
         void Next(uint instanceID);
 
         /// <summary>
@@ -100,6 +101,7 @@ namespace Honoo.Net.UPnP
         /// <param name="currentURI">Current audio/video transport uri.</param>
         /// <param name="currentURIMetaData">Current audio/video transport uri meta data.</param>
         /// <exception cref="Exception"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         void SetAVTransportURI(uint instanceID, string currentURI, string currentURIMetaData);
 
         /// <summary>
@@ -116,6 +118,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <exception cref="Exception"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:标识符不应与关键字匹配", Justification = "<挂起>")]
         void Stop(uint instanceID);
     }
 }

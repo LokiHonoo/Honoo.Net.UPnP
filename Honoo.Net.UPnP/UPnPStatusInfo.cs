@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -46,7 +47,7 @@ namespace Honoo.Net.UPnP
         {
             _connectionStatus = node.SelectSingleNode("NewConnectionStatus").InnerText.Trim();
             _lastConnectionError = node.SelectSingleNode("NewLastConnectionError").InnerText.Trim();
-            _uptime = uint.Parse(node.SelectSingleNode("NewUptime").InnerText.Trim());
+            _uptime = uint.Parse(node.SelectSingleNode("NewUptime").InnerText.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

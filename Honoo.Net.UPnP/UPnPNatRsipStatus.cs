@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 
@@ -32,8 +33,8 @@ namespace Honoo.Net.UPnP
         /// <param name="node">Response node.</param>
         internal UPnPNatRsipStatus(XmlNode node)
         {
-            _natEnabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewNATEnabled").InnerText.Trim()));
-            _rsipAvailable = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewRSIPAvailable").InnerText.Trim()));
+            _natEnabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewNATEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
+            _rsipAvailable = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewRSIPAvailable").InnerText.Trim(), CultureInfo.InvariantCulture));
         }
 
         /// <summary>

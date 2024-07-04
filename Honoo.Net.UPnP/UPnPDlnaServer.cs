@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -19,8 +20,8 @@ namespace Honoo.Net.UPnP
         private readonly string _host;
         private readonly HttpListener _listener;
         private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
-        private int _counter = 0;
-        private bool _disposed = false;
+        private int _counter;
+        private bool _disposed;
 
         #endregion Properties
 
@@ -32,6 +33,10 @@ namespace Honoo.Net.UPnP
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. http://192.168.1.100:8080 .</param>
         public UPnPDlnaServer(Uri localHost)
         {
+            if (localHost == null)
+            {
+                throw new ArgumentNullException(nameof(localHost));
+            }
             _host = localHost.AbsoluteUri;
             _listener = new HttpListener
             {
@@ -76,7 +81,7 @@ namespace Honoo.Net.UPnP
                 {
                     _listener.Close();
                 }
-                catch
+                catch (HttpListenerException)
                 {
                 }
                 _disposed = true;
@@ -98,6 +103,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddEventSubscriber(UPnPEventCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
@@ -113,8 +119,14 @@ namespace Honoo.Net.UPnP
         /// <param name="file">Local file full path to play.</param>
         /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddMedia(string file, bool checkFileExists = true)
         {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                throw new ArgumentException($"“{nameof(file)}”不能为 null 或空白。", nameof(file));
+            }
+
             if (checkFileExists && !File.Exists(file))
             {
                 throw new IOException("File not exists.");
@@ -156,6 +168,7 @@ namespace Honoo.Net.UPnP
         /// Removes specified event subscriber.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         public void RemoveEventSubscriber(string url)
         {
             _eventSubscribers.Remove(url);
@@ -165,6 +178,7 @@ namespace Honoo.Net.UPnP
         /// Removes specified media.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         public void RemoveMedia(string url)
         {
             _media.Remove(url);
@@ -193,75 +207,69 @@ namespace Honoo.Net.UPnP
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         private void GottenContext(IAsyncResult ar)
         {
-            HttpListenerContext context;
-            try
-            {
-                context = _listener.EndGetContext(ar);
-                _listener.BeginGetContext(GottenContext, null);
+            HttpListenerContext context = _listener.EndGetContext(ar);
+            _listener.BeginGetContext(GottenContext, null);
 
-                string url = context.Request.Url.AbsoluteUri.ToLowerInvariant();
-                if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
-                {
-                    byte[] buffer = new byte[context.Request.ContentLength64];
-                    context.Request.InputStream.Read(buffer, 0, buffer.Length);
-                    string response = Encoding.UTF8.GetString(buffer);
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
-                    XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-                    ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
-                    ns.AddNamespace("avt", "urn:schemas-upnp-org:metadata-1-0/AVT/");
-                    XmlNodeList instances = doc.SelectNodes("/propertyset/property/LastChange/avt:Event/avt:InstanceID", ns);
-                    List<UPnPEventMessage> messages = new List<UPnPEventMessage>();
-                    foreach (XmlNode instance in instances)
-                    {
-                        uint instanceID = uint.Parse(instance.Attributes["val"].InnerText);
-                        IDictionary<string, string> changes = new Dictionary<string, string>();
-                        foreach (XmlNode node in instance.ChildNodes)
-                        {
-                            changes.Add(node.LocalName, node.Attributes["val"].InnerText);
-                        }
-                        messages.Add(new UPnPEventMessage(instanceID, changes));
-                    }
-                    callback?.Invoke(messages.ToArray());
-                }
-                else if (_media.TryGetValue(url, out string file))
-                {
-                    using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        string range = context.Request.Headers["Range"];
-                        if (range != null)
-                        {
-                            range = range.ToLowerInvariant().Replace("bytes=", string.Empty);
-                            long position = long.Parse(range.TrimEnd('-'));
-                            context.Response.StatusCode = 206;
-                            context.Response.Headers.Add("Cache-Control: no-store");
-                            context.Response.Headers.Add("Pragma: no-cache");
-                            context.Response.Headers.Add("Connection: Keep=Alive");
-                            context.Response.Headers.Add("transferMode.dlna.org: Streaming");
-                            //context.Response.Headers.Add("Content-Type: application/octet-stream");
-                            context.Response.Headers.Add("Accept-Ranges: bytes");
-                            context.Response.ContentLength64 = stream.Length - position;
-                            context.Response.Headers.Add($"Content-Range: bytes {range}/{stream.Length}");
-                            stream.Seek(position, SeekOrigin.Begin);
-                            stream.CopyTo(context.Response.OutputStream);
-                        }
-                        else
-                        {
-                            context.Response.StatusCode = 200;
-                            context.Response.Headers.Add("Cache-Control: no-store");
-                            context.Response.Headers.Add("Pragma: no-cache");
-                            context.Response.Headers.Add("Connection: Keep=Alive");
-                            context.Response.Headers.Add("transferMode.dlna.org: Streaming");
-                            //context.Response.Headers.Add("Content-Type: application/octet-stream");
-                            stream.CopyTo(context.Response.OutputStream);
-                        }
-                    }
-                }
-            }
-            catch
+            string url = context.Request.Url.AbsoluteUri.ToLowerInvariant();
+            if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
             {
+                byte[] buffer = new byte[context.Request.ContentLength64];
+                context.Request.InputStream.Read(buffer, 0, buffer.Length);
+                string response = Encoding.UTF8.GetString(buffer);
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
+                XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+                ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
+                ns.AddNamespace("avt", "urn:schemas-upnp-org:metadata-1-0/AVT/");
+                XmlNodeList instances = doc.SelectNodes("/propertyset/property/LastChange/avt:Event/avt:InstanceID", ns);
+                List<UPnPEventMessage> messages = new List<UPnPEventMessage>();
+                foreach (XmlNode instance in instances)
+                {
+                    uint instanceID = uint.Parse(instance.Attributes["val"].InnerText, CultureInfo.InvariantCulture);
+                    Dictionary<string, string> changes = new Dictionary<string, string>();
+                    foreach (XmlNode node in instance.ChildNodes)
+                    {
+                        changes.Add(node.LocalName, node.Attributes["val"].InnerText);
+                    }
+                    messages.Add(new UPnPEventMessage(instanceID, changes));
+                }
+                callback?.Invoke(messages.ToArray());
+            }
+            else if (_media.TryGetValue(url, out string file))
+            {
+                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    string range = context.Request.Headers["Range"];
+                    if (range != null)
+                    {
+                        range = range.ToLowerInvariant().Replace("bytes=", string.Empty);
+                        long position = long.Parse(range.TrimEnd('-'), CultureInfo.InvariantCulture);
+                        context.Response.StatusCode = 206;
+                        context.Response.Headers.Add("Cache-Control: no-store");
+                        context.Response.Headers.Add("Pragma: no-cache");
+                        context.Response.Headers.Add("Connection: Keep=Alive");
+                        context.Response.Headers.Add("transferMode.dlna.org: Streaming");
+                        //context.Response.Headers.Add("Content-Type: application/octet-stream");
+                        context.Response.Headers.Add("Accept-Ranges: bytes");
+                        context.Response.ContentLength64 = stream.Length - position;
+                        context.Response.Headers.Add($"Content-Range: bytes {range}/{stream.Length}");
+                        stream.Seek(position, SeekOrigin.Begin);
+                        stream.CopyTo(context.Response.OutputStream);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 200;
+                        context.Response.Headers.Add("Cache-Control: no-store");
+                        context.Response.Headers.Add("Pragma: no-cache");
+                        context.Response.Headers.Add("Connection: Keep=Alive");
+                        context.Response.Headers.Add("transferMode.dlna.org: Streaming");
+                        //context.Response.Headers.Add("Content-Type: application/octet-stream");
+                        stream.CopyTo(context.Response.OutputStream);
+                    }
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -57,6 +58,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Current track uri.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string TrackURI => _trackURI;
 
         #endregion Properties
@@ -67,14 +69,14 @@ namespace Honoo.Net.UPnP
         /// <param name="node">Response node.</param>
         internal UPnPPositionInfo(XmlNode node)
         {
-            _track = uint.Parse(node.SelectSingleNode("Track").InnerText.Trim());
+            _track = uint.Parse(node.SelectSingleNode("Track").InnerText.Trim(), CultureInfo.InvariantCulture);
             _trackURI = node.SelectSingleNode("TrackURI").InnerText.Trim();
             _trackDuration = node.SelectSingleNode("TrackDuration").InnerText.Trim();
             _trackMetaData = node.SelectSingleNode("TrackMetaData").InnerText.Trim();
             _absTime = node.SelectSingleNode("AbsTime").InnerText.Trim();
-            _absCount = int.Parse(node.SelectSingleNode("AbsCount").InnerText.Trim());
+            _absCount = int.Parse(node.SelectSingleNode("AbsCount").InnerText.Trim(), CultureInfo.InvariantCulture);
             _relTime = node.SelectSingleNode("RelTime").InnerText.Trim();
-            _relCount = int.Parse(node.SelectSingleNode("RelCount").InnerText.Trim());
+            _relCount = int.Parse(node.SelectSingleNode("RelCount").InnerText.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

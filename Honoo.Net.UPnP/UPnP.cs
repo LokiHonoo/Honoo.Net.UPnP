@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -12,6 +13,8 @@ namespace Honoo.Net.UPnP
     public static class UPnP
     {
         #region Properties
+
+#pragma warning disable CA1707 // 标识符不应包含下划线
 
         /// <summary></summary>
         public const string UPNP_ROOT_DEVICE = "upnp:rootdevice";
@@ -97,6 +100,8 @@ namespace Honoo.Net.UPnP
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_WAN_PPP_CONNECTION_1 = "urn:schemas-upnp-org:service:WANPPPConnection:1";
 
+#pragma warning restore CA1707 // 标识符不应包含下划线
+
         #endregion Properties
 
         /// <summary>
@@ -140,7 +145,7 @@ namespace Honoo.Net.UPnP
                         int len = socket.ReceiveFrom(buffer, ref ep);
                         responses.Add(Encoding.UTF8.GetString(buffer, 0, len));
                     }
-                    catch
+                    catch (SocketException)
                     {
                         break;
                     }
@@ -157,7 +162,7 @@ namespace Honoo.Net.UPnP
                         if (index >= 0)
                         {
                             index += find.Length;
-                            int count = response.IndexOf(Environment.NewLine, index) - index;
+                            int count = response.IndexOf(Environment.NewLine, index, StringComparison.InvariantCulture) - index;
                             if (count > 0)
                             {
                                 string descriptionUrl = response.Substring(index, count).Trim();
@@ -174,13 +179,9 @@ namespace Honoo.Net.UPnP
                                 {
                                     try
                                     {
-                                        UPnPRootDevice rootDevice = new UPnPRootDevice(descriptionUrl);
-                                        if (rootDevice != null)
-                                        {
-                                            rootDevices.Add(rootDevice);
-                                        }
+                                        rootDevices.Add(new UPnPRootDevice(descriptionUrl));
                                     }
-                                    catch
+                                    catch (ArgumentNullException)
                                     {
                                     }
                                 }

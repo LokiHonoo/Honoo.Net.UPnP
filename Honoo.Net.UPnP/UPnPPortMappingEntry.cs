@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 
@@ -70,12 +71,12 @@ namespace Honoo.Net.UPnP
         {
             _protocol = node.SelectSingleNode("NewProtocol").InnerText.Trim();
             _remoteHost = node.SelectSingleNode("NewRemoteHost").InnerText.Trim();
-            _externalPort = ushort.Parse(node.SelectSingleNode("NewExternalPort").InnerText.Trim());
+            _externalPort = ushort.Parse(node.SelectSingleNode("NewExternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
             _internalClient = node.SelectSingleNode("NewInternalClient").InnerText.Trim();
-            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim());
-            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim()));
+            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
             _description = node.SelectSingleNode("NewPortMappingDescription").InnerText.Trim();
-            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim());
+            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -91,10 +92,10 @@ namespace Honoo.Net.UPnP
             _remoteHost = remoteHost;
             _externalPort = externalPort;
             _internalClient = node.SelectSingleNode("NewInternalClient").InnerText.Trim();
-            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim());
-            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim()));
+            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
             _description = node.SelectSingleNode("NewPortMappingDescription").InnerText.Trim();
-            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim());
+            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
