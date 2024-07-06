@@ -81,7 +81,7 @@ namespace Honoo.Net.UPnP
                 {
                     _listener.Close();
                 }
-                catch (HttpListenerException)
+                catch
                 {
                 }
                 _disposed = true;
@@ -103,7 +103,6 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddEventSubscriber(UPnPEventCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
@@ -119,14 +118,12 @@ namespace Honoo.Net.UPnP
         /// <param name="file">Local file full path to play.</param>
         /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddMedia(string file, bool checkFileExists = true)
         {
             if (string.IsNullOrWhiteSpace(file))
             {
-                throw new ArgumentException($"“{nameof(file)}”不能为 null 或空白。", nameof(file));
+                throw new ArgumentException($"The invalid argument - {nameof(file)}.");
             }
-
             if (checkFileExists && !File.Exists(file))
             {
                 throw new IOException("File not exists.");
@@ -168,7 +165,6 @@ namespace Honoo.Net.UPnP
         /// Removes specified event subscriber.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         public void RemoveEventSubscriber(string url)
         {
             _eventSubscribers.Remove(url);
@@ -178,7 +174,6 @@ namespace Honoo.Net.UPnP
         /// Removes specified media.
         /// </summary>
         /// <param name="url">The url of the element to remove.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         public void RemoveMedia(string url)
         {
             _media.Remove(url);
@@ -207,7 +202,6 @@ namespace Honoo.Net.UPnP
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         private void GottenContext(IAsyncResult ar)
         {
             HttpListenerContext context = _listener.EndGetContext(ar);

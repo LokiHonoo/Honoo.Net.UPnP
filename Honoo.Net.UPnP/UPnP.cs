@@ -145,7 +145,7 @@ namespace Honoo.Net.UPnP
                         int len = socket.ReceiveFrom(buffer, ref ep);
                         responses.Add(Encoding.UTF8.GetString(buffer, 0, len));
                     }
-                    catch (SocketException)
+                    catch
                     {
                         break;
                     }
@@ -181,7 +181,7 @@ namespace Honoo.Net.UPnP
                                     {
                                         rootDevices.Add(new UPnPRootDevice(descriptionUrl));
                                     }
-                                    catch (ArgumentNullException)
+                                    catch
                                     {
                                     }
                                 }

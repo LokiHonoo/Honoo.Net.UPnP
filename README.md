@@ -50,7 +50,7 @@ private static void TestPortMapping()
     {
         _ = service.GetSpecificPortMappingEntry("TCP", 4788);
     }
-    catch (Exception)
+    catch
     {
         service.AddPortMapping("TCP", 4788, IPAddress.Parse("192.168.1.11"), 4788, true, "test", 0);
     }

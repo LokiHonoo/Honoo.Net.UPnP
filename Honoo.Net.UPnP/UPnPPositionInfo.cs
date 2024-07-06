@@ -58,7 +58,6 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Current track uri.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string TrackURI => _trackURI;
 
         #endregion Properties

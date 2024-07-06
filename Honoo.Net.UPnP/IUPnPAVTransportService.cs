@@ -101,7 +101,6 @@ namespace Honoo.Net.UPnP
         /// <param name="currentURI">Current audio/video transport uri.</param>
         /// <param name="currentURIMetaData">Current audio/video transport uri meta data.</param>
         /// <exception cref="Exception"/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
         void SetAVTransportURI(uint instanceID, string currentURI, string currentURIMetaData);
 
         /// <summary>

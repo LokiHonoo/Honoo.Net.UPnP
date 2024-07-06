@@ -24,13 +24,11 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Current audio/video transport uri.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string CurrentURI => _currentURI;
 
         /// <summary>
         /// Current audio/video transport uri meta data.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string CurrentURIMetaData => _currentURIMetaData;
 
         /// <summary>
@@ -41,13 +39,11 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Next audio/video transport uri.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string NextURI => _nextURI;
 
         /// <summary>
         /// Next audio/video transport uri meta data.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
         public string NextURIMetaData => _nextURIMetaData;
 
         /// <summary>
