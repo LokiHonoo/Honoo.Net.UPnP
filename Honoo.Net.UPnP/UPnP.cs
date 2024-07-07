@@ -155,14 +155,14 @@ namespace Honoo.Net.UPnP
             {
                 foreach (string response in responses)
                 {
-                    if (response.IndexOf("HTTP/1.1 200 OK", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    if (response.IndexOf("HTTP/1.1 200 OK", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         string find = "LOCATION:";
-                        int index = response.IndexOf(find, StringComparison.InvariantCultureIgnoreCase);
+                        int index = response.IndexOf(find, StringComparison.OrdinalIgnoreCase);
                         if (index >= 0)
                         {
                             index += find.Length;
-                            int count = response.IndexOf(Environment.NewLine, index, StringComparison.InvariantCulture) - index;
+                            int count = response.IndexOf(Environment.NewLine, index, StringComparison.OrdinalIgnoreCase) - index;
                             if (count > 0)
                             {
                                 string descriptionUrl = response.Substring(index, count).Trim();
