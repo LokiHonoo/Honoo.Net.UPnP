@@ -20,7 +20,7 @@ namespace Test
             }
         }
 
-        private static void Main(string[] args)
+        private static void Main()
         {
             //TestPortMapping();
             TestDlna();

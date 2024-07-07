@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net.UPnP
 {
@@ -291,7 +292,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("AddAnyPortMapping", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -388,7 +389,7 @@ namespace Honoo.Net.UPnP
         UPnPConnectionTypeInfo IUPnPWANConnectionService.GetConnectionTypeInfo()
         {
             string response = PostAction("GetConnectionTypeInfo", null);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -405,7 +406,7 @@ namespace Honoo.Net.UPnP
         string IUPnPWANConnectionService.GetExternalIPAddress()
         {
             string response = PostAction("GetExternalIPAddress", null);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -426,7 +427,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetGenericPortMappingEntry", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -454,7 +455,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("NewNumberOfPorts", "65535")
             };
             string response = PostAction("GetListOfPortMappings", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -471,7 +472,7 @@ namespace Honoo.Net.UPnP
         UPnPNatRsipStatus IUPnPWANConnectionService.GetNATRSIPStatus()
         {
             string response = PostAction("GetNATRSIPStatus", null);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -495,7 +496,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetSpecificPortMappingEntry", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -512,7 +513,7 @@ namespace Honoo.Net.UPnP
         UPnPStatusInfo IUPnPWANConnectionService.GetStatusInfo()
         {
             string response = PostAction("GetStatusInfo", null);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -559,7 +560,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetCurrentTransportActions", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -580,7 +581,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetDeviceCapabilities", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -601,7 +602,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetMediaInfo", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -622,7 +623,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetPositionInfo", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -643,7 +644,13 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetTransportInfo", arguments);
-            XmlDocument doc = new XmlDocument();
+
+            //XElement element = XElement.Parse(response);
+            //XNamespace ns1 = "http://schemas.xmlsoap.org/soap/envelope/";
+            //XNamespace ns2 = _serviceType;
+            //element.Element(ns1 + "Envelope").Element(ns1 + "Body").Element(ns2 + "GetTransportInfoResponse");
+
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -664,7 +671,7 @@ namespace Honoo.Net.UPnP
                 new KeyValuePair<string, string>("InstanceID", instanceID.ToString(CultureInfo.InvariantCulture))
             };
             string response = PostAction("GetTransportSettings", arguments);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(response);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");

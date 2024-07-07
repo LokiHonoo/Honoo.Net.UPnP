@@ -1,0 +1,10 @@
+﻿// This file is used by Code Analysis to maintain SuppressMessage
+// attributes that are applied to this project.
+// Project-level suppressions either have no target or are given
+// a specific target and scoped to a namespace, type, member, etc.
+
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Design", "CA1054:类 URI 参数不应为字符串", Justification = "<挂起>")]
+[assembly: SuppressMessage("Design", "CA1056:类 URI 属性不应是字符串", Justification = "<挂起>")]
+[assembly: SuppressMessage("Design", "CA1031:不捕获常规异常类型", Justification = "<挂起>")]

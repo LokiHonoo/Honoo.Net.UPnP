@@ -64,7 +64,7 @@ namespace Honoo.Net.UPnP
             _client.Headers.Add("Content-Type: text/xml; charset=utf-8");
             _client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
             string description = _client.DownloadString(descriptionUri);
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(description);
             XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
             ns.AddNamespace("default", "urn:schemas-upnp-org:device-1-0");

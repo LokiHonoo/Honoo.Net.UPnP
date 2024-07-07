@@ -17,11 +17,11 @@
 		<PackageTags>Honoo;UPnP;PortMapping;DLNA</PackageTags>
 		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
 		<RootNamespace>Honoo.Net</RootNamespace>
-		<Version>1.0.4</Version>
+		<Version>1.0.6</Version>
 		<PackageReadmeFile>README-NuGet.md</PackageReadmeFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<EnableNETAnalyzers>True</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisLevel>latest-all</AnalysisLevel>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

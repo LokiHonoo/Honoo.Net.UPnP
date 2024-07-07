@@ -213,7 +213,7 @@ namespace Honoo.Net.UPnP
                 byte[] buffer = new byte[context.Request.ContentLength64];
                 context.Request.InputStream.Read(buffer, 0, buffer.Length);
                 string response = Encoding.UTF8.GetString(buffer);
-                XmlDocument doc = new XmlDocument();
+                XmlDocument doc = new XmlDocument() { XmlResolver = null };
                 doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
                 XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
                 ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
@@ -239,7 +239,7 @@ namespace Honoo.Net.UPnP
                     string range = context.Request.Headers["Range"];
                     if (range != null)
                     {
-                        range = range.ToLowerInvariant().Replace("bytes=", string.Empty);
+                        range = range.ToUpperInvariant().Replace("BYTES=", string.Empty);
                         long position = long.Parse(range.TrimEnd('-'), CultureInfo.InvariantCulture);
                         context.Response.StatusCode = 206;
                         context.Response.Headers.Add("Cache-Control: no-store");
