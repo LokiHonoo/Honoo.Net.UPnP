@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -15,6 +14,9 @@ namespace Honoo.Net.UPnP
         #region Properties
 
 #pragma warning disable CA1707 // 标识符不应包含下划线
+
+        /// <summary></summary>
+        public const string SSDP_ALL = "ssdp:all";
 
         /// <summary></summary>
         public const string UPNP_ROOT_DEVICE = "upnp:rootdevice";
@@ -107,7 +109,11 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Discover UPnP devices.
         /// </summary>
-        /// <param name="searchTarget">Http header "ST". Look this: <see cref="UPNP_ROOT_DEVICE"/> and so on.</param>
+        /// <param name="searchTarget">
+        /// Http header "ST". Look this: <see cref="UPNP_ROOT_DEVICE"/> and so on.
+        /// <br/>Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
+        /// <br/>Can used UUID string as "uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".
+        /// </param>
         /// <param name="durationMilliseconds">Search duration. unit is milliseconds.</param>
         /// <returns></returns>
         public static UPnPRootDevice[] Discover(string searchTarget = UPNP_ROOT_DEVICE, int durationMilliseconds = 2000)
