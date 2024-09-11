@@ -3,17 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net40;net6.0</TargetFrameworks>	
-	  <ImplicitUsings>disabled</ImplicitUsings>
+	  <ImplicitUsings>disabled</ImplicitUsings>	
+	  <AssemblyName>UPnPTest</AssemblyName>
   </PropertyGroup>
-
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\Debug</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\Release</OutputPath>
-	</PropertyGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Honoo.Net.UPnP\Honoo.Net.UPnP.csproj" />

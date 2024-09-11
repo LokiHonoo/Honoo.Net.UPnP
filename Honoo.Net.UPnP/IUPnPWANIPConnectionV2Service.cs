@@ -6,7 +6,7 @@ namespace Honoo.Net.UPnP
     /// <summary>
     /// UPnP IGDv2 "urn:schemas-upnp-org:service:WANIPConnection:2" interface.
     /// </summary>
-    public interface IUPnPWANIPConnectionServiceV2 : IUPnPWANIPConnectionService
+    public interface IUPnPWANIPConnectionV2Service : IUPnPWANIPConnectionService
     {
         /// <summary>
         /// Add any port mapping, and gets reserved port.

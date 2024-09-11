@@ -15,7 +15,7 @@ namespace Honoo.Net.UPnP
         IUPnPService,
         IUPnPWANConnectionService,
         IUPnPWANIPConnectionService,
-        IUPnPWANIPConnectionServiceV2,
+        IUPnPWANIPConnectionV2Service,
         IUPnPWANPPPConnectionService,
         IUPnPAVTransportService
     {
@@ -96,52 +96,71 @@ namespace Honoo.Net.UPnP
 
         #endregion Construction
 
+        #region Interfaces
+
+        /// <summary>
+        /// Gets the interface "IUPnPAVTransportService".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPAVTransportService GetAVTransportServiceInterface()
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the interface "IUPnPService".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPService GetInterface()
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the interface "IUPnPWANConnectionService".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPWANConnectionService GetWANConnectionServiceInterface()
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the interface "IUPnPWANIPConnectionService".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPWANIPConnectionService GetWANIPConnectionServiceInterface()
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the interface "IUPnPWANIPConnectionV2Service".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPWANIPConnectionV2Service GetWANIPConnectionV2ServiceInterface()
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the interface "IUPnPWANPPPConnectionService".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPWANPPPConnectionService GetWANPPPConnectionServiceInterface()
+        {
+            return this;
+        }
+
+        #endregion Interfaces
+
         #region Common
-
-        /// <summary>
-        /// Convert to the interface "IUPnPAVTransportService".
-        /// </summary>
-        /// <returns></returns>
-        public void GetInterface(out IUPnPAVTransportService serviceInterface)
-        {
-            serviceInterface = this;
-        }
-
-        /// <summary>
-        /// Convert to the interface "IUPnPWANConnectionService".
-        /// </summary>
-        /// <returns></returns>
-        public void GetInterface(out IUPnPWANConnectionService serviceInterface)
-        {
-            serviceInterface = this;
-        }
-
-        /// <summary>
-        /// Convert to the interface "IUPnPWANIPConnectionService".
-        /// </summary>
-        /// <returns></returns>
-        public void GetInterface(out IUPnPWANIPConnectionService serviceInterface)
-        {
-            serviceInterface = this;
-        }
-
-        /// <summary>
-        /// Convert to the interface "IUPnPWANIPConnectionServiceV2".
-        /// </summary>
-        /// <returns></returns>
-        public void GetInterface(out IUPnPWANIPConnectionServiceV2 serviceInterface)
-        {
-            serviceInterface = this;
-        }
-
-        /// <summary>
-        /// Convert to the interface "IUPnPWANPPPConnectionService".
-        /// </summary>
-        /// <returns></returns>
-        public void GetInterface(out IUPnPWANPPPConnectionService serviceInterface)
-        {
-            serviceInterface = this;
-        }
 
         /// <summary>
         /// Gets SCPD information form SCPD url.
@@ -269,7 +288,7 @@ namespace Honoo.Net.UPnP
         /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        ushort IUPnPWANIPConnectionServiceV2.AddAnyPortMapping(string protocol,
+        ushort IUPnPWANIPConnectionV2Service.AddAnyPortMapping(string protocol,
                                                                ushort externalPort,
                                                                IPAddress internalClient,
                                                                ushort internalPort,
@@ -361,7 +380,7 @@ namespace Honoo.Net.UPnP
         /// <param name="endPort">The end port of search.</param>
         /// <param name="manage">Elevate privileges.</param>
         /// <exception cref="Exception"/>
-        void IUPnPWANIPConnectionServiceV2.DeletePortMappingRange(string protocol, ushort startPort, ushort endPort, bool manage)
+        void IUPnPWANIPConnectionV2Service.DeletePortMappingRange(string protocol, ushort startPort, ushort endPort, bool manage)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),
@@ -445,7 +464,7 @@ namespace Honoo.Net.UPnP
         /// <param name="manage">Elevate privileges.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        string IUPnPWANIPConnectionServiceV2.GetListOfPortMappings(string protocol, ushort startPort, ushort endPort, bool manage)
+        string IUPnPWANIPConnectionV2Service.GetListOfPortMappings(string protocol, ushort startPort, ushort endPort, bool manage)
         {
             KeyValuePair<string, string>[] arguments = new KeyValuePair<string, string>[] {
                 new KeyValuePair<string, string>("NewProtocol", protocol),

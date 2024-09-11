@@ -2,7 +2,7 @@
 
 - [Honoo.Net.UPnP](#honoonetupnp)
   - [INTRODUCTION](#introduction)
-  - [USAGE](#usage)
+  - [GUIDE](#guide)
     - [GitHub](#github)
   - [LICENSE](#license)
 
@@ -10,7 +10,7 @@
 
 Simple UPnP. Provides port mapping, DLNA e.g..
 
-## USAGE
+## GUIDE
 
 ### GitHub
 

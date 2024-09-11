@@ -1,7 +1,9 @@
 ﻿using Honoo.Net.UPnP;
+using Honoo.Windows;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 
 namespace Test
 {
@@ -22,19 +24,50 @@ namespace Test
 
         private static void Main()
         {
-            //TestPortMapping();
-            TestDlna();
-            Console.ReadKey(true);
+            ConsoleHelper.DisableQuickEditMode();
+
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("=======================================================================================");
+                Console.WriteLine();
+                Console.WriteLine("                        Honoo.Net.UPnP TEST   runtime " + Environment.Version);
+                Console.WriteLine();
+                Console.WriteLine("=======================================================================================");
+                //
+                Console.WriteLine();
+                Console.WriteLine("  1. Port Mapping");
+                Console.WriteLine("  2. Dlna");
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.Write("Choice a project:");
+                while (true)
+                {
+                    var kc = Console.ReadKey(true).KeyChar;
+                    switch (kc)
+                    {
+                        case '1': Console.Clear(); TestPortMapping(); break;
+                        case '2': Console.Clear(); TestDlna(); break;
+                        default: continue;
+                    }
+                    break;
+                }
+                Console.WriteLine();
+                Console.Write("Press any key to Main Menu...");
+                Console.ReadKey(true);
+            }
         }
 
         private static void TestDlna()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1, 2000);
+            UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
             UPnPRootDevice dlna = devices[0];
 
-            //Console.WriteLine(((IUPnPMediaRendererDevice)dlna.Device).XDlnaDoc);
+            Console.WriteLine(dlna.Device.GetMediaRendererDeviceInterface().XDlnaDoc);
 
-            IUPnPAVTransportService service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+            IUPnPAVTransportService service = dlna.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
 
             //Console.WriteLine(service.GetDeviceCapabilities(0));
             //Console.WriteLine(service.GetTransportSettings(0));
@@ -44,11 +77,12 @@ namespace Test
             //Console.WriteLine(service.GetCurrentTransportActions(0));
 
             // Need setup firewall. Administrator privileges are required.
-            UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.11:8080/"));
+            UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.4:8080/"));
 
-            string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
+            //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
             //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
+            //string mediaUrl = mediaServer.AddMedia("E:\\Videos\\MV\\ロタティオン (LOTUS-2).MPG");
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
             service.SetAVTransportURI(0, mediaUrl, string.Empty);
             service.Play(0, "1");
@@ -62,9 +96,9 @@ namespace Test
 
         private static void TestPortMapping()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1, 2000);
+            UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
             UPnPRootDevice router = devices[0];
-            IUPnPWANIPConnectionService service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+            IUPnPWANIPConnectionService service = router.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
             //Console.WriteLine(service.GetNATRSIPStatus());
             //Console.WriteLine(service.GetExternalIPAddress());
@@ -83,8 +117,6 @@ namespace Test
             UPnPPortMappingEntry entry = service.GetSpecificPortMappingEntry("TCP", 4788);
             Console.WriteLine(entry.Protocol + " " + entry.ExternalPort + " " + entry.InternalClient + ":" + entry.InternalPort);
             service.DeletePortMapping("TCP", 4788);
-
-            Console.ReadKey(true);
         }
     }
 }

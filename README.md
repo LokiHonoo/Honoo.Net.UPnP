@@ -2,9 +2,9 @@
 
 - [Honoo.Net.UPnP](#honoonetupnp)
   - [INTRODUCTION](#introduction)
-  - [USAGE](#usage)
+  - [GUIDE](#guide)
     - [NuGet](#nuget)
-  - [QUICK START](#quick-start)
+  - [USAGE](#usage)
     - [Namespace](#namespace)
     - [PortMapping](#portmapping)
     - [DLNA](#dlna)
@@ -14,13 +14,13 @@
 
 Simple UPnP. Provides port mapping, DLNA e.g..
 
-## USAGE
+## GUIDE
 
 ### NuGet
 
 <https://www.nuget.org/packages/Honoo.Net.UPnP/>
 
-## QUICK START
+## USAGE
 
 ### Namespace
 
@@ -36,9 +36,9 @@ using Honoo.Net.UPnP;
 
 private static void TestPortMapping()
 {
-    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1, 2000);
+    UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
     UPnPRootDevice router = devices[0];
-    IUPnPWANIPConnectionService service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+    IUPnPWANIPConnectionService service = router.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
     //Console.WriteLine(service.GetNATRSIPStatus());
     //Console.WriteLine(service.GetExternalIPAddress());
@@ -69,12 +69,12 @@ private static void TestPortMapping()
 
 private static void TestDlna()
 {
-    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1, 2000);
+    UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     UPnPRootDevice dlna = devices[0];
 
-    //Console.WriteLine(((IUPnPMediaRendererDevice)dlna.Device).XDlnaDoc);
+    Console.WriteLine(dlna.Device.GetMediaRendererDeviceInterface().XDlnaDoc);
 
-    IUPnPAVTransportService service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    IUPnPAVTransportService service = dlna.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
 
     //Console.WriteLine(service.GetDeviceCapabilities(0));
     //Console.WriteLine(service.GetTransportSettings(0));
@@ -86,7 +86,7 @@ private static void TestDlna()
     // Need setup firewall. Administrator privileges are required.
     UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.1.11:8080/"));
 
-    //string callbackUrl = server.AddEventSubscriber(DlanEventCallback);
+    //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
     //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");

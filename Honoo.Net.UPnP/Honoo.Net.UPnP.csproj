@@ -16,29 +16,21 @@
 		<RepositoryUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</RepositoryUrl>
 		<PackageTags>Honoo;UPnP;PortMapping;DLNA</PackageTags>
 		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
-		<RootNamespace>Honoo.Net</RootNamespace>
-		<Version>1.0.6</Version>
-		<PackageReadmeFile>README-NuGet.md</PackageReadmeFile>
+		<RootNamespace>Honoo.Net.UPnP</RootNamespace>
+		<Version>1.0.7</Version>
+		<PackageReadmeFile>Honoo.Net.UPnP.md</PackageReadmeFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<EnableNETAnalyzers>True</EnableNETAnalyzers>
 		<AnalysisLevel>latest-all</AnalysisLevel>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\Debug</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\Release</OutputPath>
-		<DocumentationFile>..\bin\Release\$(TargetFramework)\$(PackageId).xml</DocumentationFile>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\README-NuGet.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
+	  <None Include="Honoo.Net.UPnP.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

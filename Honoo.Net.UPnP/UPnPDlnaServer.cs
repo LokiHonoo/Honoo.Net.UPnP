@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -18,17 +19,22 @@ namespace Honoo.Net.UPnP
 
         private readonly Dictionary<string, UPnPEventCallback> _eventSubscribers = new Dictionary<string, UPnPEventCallback>();
         private readonly string _host;
-        private readonly HttpListener _listener;
         private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
         private int _counter;
         private bool _disposed;
+        private HttpListener _listener;
+
+        /// <summary>
+        /// Gets a value that indecates whether HttpListener has been started.
+        /// </summary>
+        public bool IsListening => _listener.IsListening;
 
         #endregion Properties
 
         #region Construction
 
         /// <summary>
-        /// Initializes a new instance of the UPnPDlnaServer class.
+        /// Initializes a new instance of the UPnPDlnaServer class. Need setup firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. http://192.168.1.100:8080 .</param>
         public UPnPDlnaServer(Uri localHost)
@@ -80,6 +86,7 @@ namespace Honoo.Net.UPnP
                 try
                 {
                     _listener.Close();
+                    _listener = null;
                 }
                 catch
                 {
@@ -103,6 +110,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddEventSubscriber(UPnPEventCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
@@ -118,6 +126,7 @@ namespace Honoo.Net.UPnP
         /// <param name="file">Local file full path to play.</param>
         /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddMedia(string file, bool checkFileExists = true)
         {
             if (string.IsNullOrWhiteSpace(file))
@@ -202,6 +211,7 @@ namespace Honoo.Net.UPnP
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         private void GottenContext(IAsyncResult ar)
         {
             HttpListenerContext context = _listener.EndGetContext(ar);
@@ -215,6 +225,11 @@ namespace Honoo.Net.UPnP
                 string response = Encoding.UTF8.GetString(buffer);
                 XmlDocument doc = new XmlDocument() { XmlResolver = null };
                 doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
+                //StringReader sreader = new StringReader(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
+                //using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings() { XmlResolver = null }))
+                //{
+                //    doc.Load(reader);
+                //}
                 XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
                 ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
                 ns.AddNamespace("avt", "urn:schemas-upnp-org:metadata-1-0/AVT/");
@@ -239,8 +254,8 @@ namespace Honoo.Net.UPnP
                     string range = context.Request.Headers["Range"];
                     if (range != null)
                     {
-                        range = range.ToUpperInvariant().Replace("BYTES=", string.Empty);
-                        long position = long.Parse(range.TrimEnd('-'), CultureInfo.InvariantCulture);
+                        range = range.ToUpperInvariant().Replace("BYTES=", string.Empty).TrimEnd('-');
+                        long position = long.Parse(range, CultureInfo.InvariantCulture);
                         context.Response.StatusCode = 206;
                         context.Response.Headers.Add("Cache-Control: no-store");
                         context.Response.Headers.Add("Pragma: no-cache");
@@ -261,9 +276,13 @@ namespace Honoo.Net.UPnP
                         context.Response.Headers.Add("Connection: Keep=Alive");
                         context.Response.Headers.Add("transferMode.dlna.org: Streaming");
                         //context.Response.Headers.Add("Content-Type: application/octet-stream");
+                        stream.Seek(0, SeekOrigin.Begin);
                         stream.CopyTo(context.Response.OutputStream);
                     }
                 }
+                context.Response.OutputStream.Flush();
+                context.Response.OutputStream.Close();
+                context.Response.Close();
             }
         }
     }

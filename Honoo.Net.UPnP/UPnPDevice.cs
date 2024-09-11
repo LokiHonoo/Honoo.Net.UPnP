@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Xml;
 
 namespace Honoo.Net.UPnP
@@ -170,14 +169,29 @@ namespace Honoo.Net.UPnP
 
         #endregion Construction
 
+        #region Interfaces
+
         /// <summary>
-        /// Convert to the interface "IUPnPMediaRendererDevice".
+        /// Gets the interface "IUPnPDevice".
         /// </summary>
         /// <returns></returns>
-        public void GetInterface(out IUPnPMediaRendererDevice deviceInterface)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPDevice GetInterface()
         {
-            deviceInterface = this;
+            return this;
         }
+
+        /// <summary>
+        /// Gets the interface "IUPnPMediaRendererDevice".
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
+        public IUPnPMediaRendererDevice GetMediaRendererDeviceInterface()
+        {
+            return this;
+        }
+
+        #endregion Interfaces
 
         /// <summary>
         /// Find the specified type of device if this device contains, else return "null".
