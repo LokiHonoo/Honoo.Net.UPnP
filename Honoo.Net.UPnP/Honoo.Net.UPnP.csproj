@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net40;net462;netstandard2.0</TargetFrameworks>
 		<PackageId>Honoo.Net.UPnP</PackageId>
 		<ProductName>Honoo.Net.UPnP</ProductName>
 		<Company>Loki Honoo</Company>
