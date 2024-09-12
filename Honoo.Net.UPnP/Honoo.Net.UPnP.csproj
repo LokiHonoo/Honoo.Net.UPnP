@@ -24,6 +24,7 @@
 		<AnalysisLevel>latest-all</AnalysisLevel>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<BaseOutputPath>..\bin\</BaseOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

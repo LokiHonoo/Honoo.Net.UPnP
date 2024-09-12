@@ -4,7 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net40;net6.0</TargetFrameworks>	
 	  <ImplicitUsings>disabled</ImplicitUsings>	
-	  <AssemblyName>UPnPTest</AssemblyName>
+	  <AssemblyName>Test</AssemblyName>
+	  <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
 
 	<ItemGroup>
