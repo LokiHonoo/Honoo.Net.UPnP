@@ -3,7 +3,6 @@ using Honoo.Windows;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
 
 namespace Test
 {
@@ -68,7 +67,7 @@ namespace Test
             Console.WriteLine(dlna.Device.GetMediaRendererDeviceInterface().XDlnaDoc);
 
             IUPnPAVTransportService service = dlna.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
-
+            
             //Console.WriteLine(service.GetDeviceCapabilities(0));
             //Console.WriteLine(service.GetTransportSettings(0));
             //Console.WriteLine(service.GetMediaInfo(0));
@@ -82,7 +81,6 @@ namespace Test
             //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
             //string sid = service.SetEventSubscription(callbackUrl, 3600);
 
-            //string mediaUrl = mediaServer.AddMedia("E:\\Videos\\MV\\ロタティオン (LOTUS-2).MPG");
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
             service.SetAVTransportURI(0, mediaUrl, string.Empty);
             service.Play(0, "1");

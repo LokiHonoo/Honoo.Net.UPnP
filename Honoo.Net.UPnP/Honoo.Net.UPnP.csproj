@@ -10,14 +10,14 @@
 		<Copyright>Copyright (C) Loki Honoo 2021. All rights reserved.</Copyright>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>Honoo.Net.UPnP.snk</AssemblyOriginatorKeyFile>
-		<Description>Simple UPNP. Provides port mapping, DLNA e.g..</Description>
+		<Description>Simple UPnP. Provides port mapping, DLNA e.g..</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</RepositoryUrl>
 		<PackageTags>Honoo;UPnP;PortMapping;DLNA</PackageTags>
 		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
 		<RootNamespace>Honoo.Net.UPnP</RootNamespace>
-		<Version>1.0.7</Version>
+		<Version>1.0.8</Version>
 		<PackageReadmeFile>Honoo.Net.UPnP.md</PackageReadmeFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<EnableNETAnalyzers>True</EnableNETAnalyzers>
