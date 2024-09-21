@@ -7,7 +7,7 @@ namespace Honoo.Net.UPnP
     /// <summary>
     /// UPnP device.
     /// </summary>
-    public sealed class UPnPDevice : IUPnPDevice, IUPnPMediaRendererDevice
+    public sealed class UPnPDevice : IUPnPDevice, IUPnPMediaRenderer1Device
     {
         #region Properties
 
@@ -15,6 +15,7 @@ namespace Honoo.Net.UPnP
         private readonly string _deviceType;
         private readonly string _friendlyName;
         private readonly UPnPIcon[] _icons;
+        private readonly UPnPDeviceInterfaces _interfaces;
         private readonly string _manufacturer;
         private readonly string _manufacturerUrl;
         private readonly string _modelDescription;
@@ -48,6 +49,11 @@ namespace Honoo.Net.UPnP
         /// Icons.
         /// </summary>
         public ICollection<UPnPIcon> Icons => _icons;
+
+        /// <summary>
+        /// UPnP device interfaces.
+        /// </summary>
+        public UPnPDeviceInterfaces Interfaces => _interfaces;
 
         /// <summary>
         /// Manufacturer.
@@ -112,7 +118,7 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Gets the x dlna doc if this device provides dlna service, else return "null".
         /// </summary>
-        string IUPnPMediaRendererDevice.XDlnaDoc => _xDlnaDoc;
+        string IUPnPMediaRenderer1Device.XDlnaDoc => _xDlnaDoc;
 
         #endregion Properties
 
@@ -165,33 +171,10 @@ namespace Honoo.Net.UPnP
             _icons = icons.ToArray();
             _devices = devices.ToArray();
             _services = services.ToArray();
+            _interfaces = new UPnPDeviceInterfaces(this);
         }
 
         #endregion Construction
-
-        #region Interfaces
-
-        /// <summary>
-        /// Gets the interface "IUPnPDevice".
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
-        public IUPnPDevice GetInterface()
-        {
-            return this;
-        }
-
-        /// <summary>
-        /// Gets the interface "IUPnPMediaRendererDevice".
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:在适用处使用属性", Justification = "<挂起>")]
-        public IUPnPMediaRendererDevice GetMediaRendererDeviceInterface()
-        {
-            return this;
-        }
-
-        #endregion Interfaces
 
         /// <summary>
         /// Find the specified type of device if this device contains, else return "null".

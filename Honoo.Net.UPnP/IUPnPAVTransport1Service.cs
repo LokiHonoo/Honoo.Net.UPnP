@@ -5,7 +5,7 @@ namespace Honoo.Net.UPnP
     /// <summary>
     /// UPnP IGDv1 "urn:schemas-upnp-org:service:AVTransport:1" interface.
     /// </summary>
-    public interface IUPnPAVTransportService : IUPnPService
+    public interface IUPnPAVTransport1Service : IUPnPService
     {
         /// <summary>
         /// Get current transport actions.

@@ -57,7 +57,7 @@ namespace Honoo.Net.UPnP
         /// <param name="arguments">action arguments. The arguments must conform to the order specified. Set 'null' if haven't arguments.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        string PostAction(string action, IList<KeyValuePair<string, string>> arguments);
+        string PostAction(string action, IDictionary<string, string> arguments);
 
         /// <summary>
         ///  Remove event subscription.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Xml;
@@ -16,6 +17,7 @@ namespace Honoo.Net.UPnP
         private readonly WebClient _client;
         private readonly string _descriptionUrl;
         private readonly UPnPDevice _device;
+        private readonly IDictionary<string, string> _headerExtensions = new Dictionary<string, string>();
         private readonly Version _specVersion;
         private bool _disposed;
 
@@ -33,6 +35,17 @@ namespace Honoo.Net.UPnP
         /// Main device.
         /// </summary>
         public UPnPDevice Device => _device;
+
+        /// <summary>
+        /// Append custom header if this device doesn't work. Basic for
+        /// <br/>"Cache-Control: no-store"
+        /// <br/>"Pragma: no-cache"
+        /// <br/>"Content-Type: text/xml; charset=utf-8"
+        /// <br/>"User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+        /// <br/>
+        /// <br/>Append MAN HTTP Header If throw 405 WebException. MAN: "http://schemas.xmlsoap.org/soap/envelope/"; ns=01
+        /// </summary>
+        public IDictionary<string, string> HeaderExtensions => _headerExtensions;
 
         /// <summary>
         /// Specification version.
@@ -63,6 +76,13 @@ namespace Honoo.Net.UPnP
             _client.Headers.Add("Pragma: no-cache");
             _client.Headers.Add("Content-Type: text/xml; charset=utf-8");
             _client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            if (_headerExtensions.Count > 0)
+            {
+                foreach (var header in _headerExtensions)
+                {
+                    _client.Headers.Add(header.Key, header.Value);
+                }
+            }
             string description = _client.DownloadString(descriptionUri);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
             doc.LoadXml(description);

@@ -24,7 +24,6 @@ namespace Test
         private static void Main()
         {
             ConsoleHelper.DisableQuickEditMode();
-
             while (true)
             {
                 Console.Clear();
@@ -61,13 +60,14 @@ namespace Test
 
         private static void TestDlna()
         {
-            UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
             UPnPRootDevice dlna = devices[0];
 
-            Console.WriteLine(dlna.Device.GetMediaRendererDeviceInterface().XDlnaDoc);
+            Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
 
-            IUPnPAVTransportService service = dlna.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
-            
+            //var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
+            IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+
             //Console.WriteLine(service.GetDeviceCapabilities(0));
             //Console.WriteLine(service.GetTransportSettings(0));
             //Console.WriteLine(service.GetMediaInfo(0));
@@ -78,25 +78,28 @@ namespace Test
             // Need setup firewall. Administrator privileges are required.
             UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.4:8080/"));
 
-            //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
-            //string sid = service.SetEventSubscription(callbackUrl, 3600);
+            string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
+            string sid = service.SetEventSubscription(callbackUrl, 3600);
 
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
             service.SetAVTransportURI(0, mediaUrl, string.Empty);
             service.Play(0, "1");
+            //service.Seek(0, "rel_time", "00:33:33");
             Console.ReadKey(true);
-            service.Stop(0);
-            mediaServer.Dispose();
 
+            service.Stop(0);
             //service.RemoveEventSubscription(sid);
+            mediaServer.Dispose();
             //mediaServer.RemoveEventSubscriber(callbackUrl);
         }
 
         private static void TestPortMapping()
         {
-            UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
             UPnPRootDevice router = devices[0];
-            IUPnPWANIPConnectionService service = router.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+
+            //var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
+            IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
             //Console.WriteLine(service.GetNATRSIPStatus());
             //Console.WriteLine(service.GetExternalIPAddress());

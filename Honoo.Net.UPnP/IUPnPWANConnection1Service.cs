@@ -4,9 +4,9 @@ using System.Net;
 namespace Honoo.Net.UPnP
 {
     /// <summary>
-    /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANIPConnection:1" or "urn:schemas-upnp-org:service:WANPPPConnection:1" interface.
+    /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANConnection:1" interface.
     /// </summary>
-    public interface IUPnPWANConnectionService : IUPnPService
+    public interface IUPnPWANConnection1Service : IUPnPService
     {
         /// <summary>
         /// Add port mapping.

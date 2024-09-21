@@ -36,9 +36,11 @@ using Honoo.Net.UPnP;
 
 private static void TestPortMapping()
 {
-    UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
     UPnPRootDevice router = devices[0];
-    IUPnPWANIPConnectionService service = router.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+
+    //var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
+    IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
 
     //Console.WriteLine(service.GetNATRSIPStatus());
     //Console.WriteLine(service.GetExternalIPAddress());
@@ -69,12 +71,13 @@ private static void TestPortMapping()
 
 private static void TestDlna()
 {
-    UPnPRootDevice[] devices = UPnPDiscoverer.Discover(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     UPnPRootDevice dlna = devices[0];
 
-    Console.WriteLine(dlna.Device.GetMediaRendererDeviceInterface().XDlnaDoc);
+    Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
 
-    IUPnPAVTransportService service = dlna.FindService(UPnPSearchTarget.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    //var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
+    IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
 
     //Console.WriteLine(service.GetDeviceCapabilities(0));
     //Console.WriteLine(service.GetTransportSettings(0));
@@ -92,11 +95,12 @@ private static void TestDlna()
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
     service.SetAVTransportURI(0, mediaUrl, string.Empty);
     service.Play(0, "1");
-    Console.ReadKey(true);
-    service.Stop(0);
-    mediaServer.Dispose();
 
+    Console.ReadKey(true);
+
+    service.Stop(0);
     //service.RemoveEventSubscription(sid);
+    mediaServer.Dispose();
     //mediaServer.RemoveEventSubscriber(callbackUrl);
 }
 
