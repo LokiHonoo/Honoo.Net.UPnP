@@ -88,7 +88,7 @@ namespace Test
             Console.ReadKey(true);
 
             service.Stop(0);
-            //service.RemoveEventSubscription(sid);
+            service.RemoveEventSubscription(sid);
             mediaServer.Dispose();
             //mediaServer.RemoveEventSubscriber(callbackUrl);
         }
