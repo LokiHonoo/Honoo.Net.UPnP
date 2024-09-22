@@ -7,7 +7,7 @@
 		<Authors>LokiHonoo</Authors>		
 		<Company>LokiHonoo</Company>		
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<Copyright>Copyright (C) Loki Honoo 2021. All rights reserved.</Copyright>
+		<Copyright>Copyright (C) LokiHonoo 2021. All rights reserved.</Copyright>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>Honoo.Net.UPnP.snk</AssemblyOriginatorKeyFile>
 		<Description>Simple UPnP. Provides port mapping, DLNA e.g..</Description>
