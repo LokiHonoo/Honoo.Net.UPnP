@@ -25,7 +25,11 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<BaseOutputPath>..\bin\</BaseOutputPath>
 	</PropertyGroup>
-
+	
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<PackageOutputPath>D:\NuGetPackages</PackageOutputPath>
+	</PropertyGroup>
+	
 	<ItemGroup>
 	  <None Include="Honoo.Net.UPnP.md">
 	    <Pack>True</Pack>
