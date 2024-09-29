@@ -48,15 +48,16 @@ private static void TestPortMapping()
     //Console.WriteLine(service.GetConnectionTypeInfo());
     //Console.WriteLine(service.GetGenericPortMappingEntry(1));
 
+    UPnPPortMappingEntry entry;
     try
     {
-        _ = service.GetSpecificPortMappingEntry("TCP", 4788);
+        entry = service.GetSpecificPortMappingEntry("TCP", 4788);
     }
     catch
     {
         service.AddPortMapping("TCP", 4788, IPAddress.Parse("192.168.1.11"), 4788, true, "test", 0);
+        entry = service.GetSpecificPortMappingEntry("TCP", 4788);
     }
-    UPnPPortMappingEntry entry = service.GetSpecificPortMappingEntry("TCP", 4788);
     Console.WriteLine(entry.Protocol + " " + entry.ExternalPort + " " + entry.InternalClient + ":" + entry.InternalPort);
     service.DeletePortMapping("TCP", 4788);
 
@@ -97,11 +98,11 @@ private static void TestDlna()
     service.Play(0, "1");
 
     Console.ReadKey(true);
-
     service.Stop(0);
+    //
     //service.RemoveEventSubscription(sid);
-    mediaServer.Dispose();
     //mediaServer.RemoveEventSubscriber(callbackUrl);
+    mediaServer.Dispose();
 }
 
 ```
