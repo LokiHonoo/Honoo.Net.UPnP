@@ -107,10 +107,10 @@ namespace Honoo.Net.UPnP
         /// <br/>Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
         /// <br/>Can used UUID string as "uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".
         /// </param>
-        /// <param name="durationMilliseconds">Search duration. Unit is milliseconds.</param>
         /// <param name="mxSeconds">Maximum response timeout. Unit is seconds.</param>
+        /// <param name="durationMilliseconds">Search duration. Unit is milliseconds.</param>
         /// <returns></returns>
-        public static UPnPRootDevice[] Discover(string searchTarget = UPNP_ROOT_DEVICE, int durationMilliseconds = 2000, int mxSeconds = 2)
+        public static UPnPRootDevice[] Discover(string searchTarget = UPNP_ROOT_DEVICE, int mxSeconds = 2, int durationMilliseconds = 2000)
         {
             List<UPnPRootDevice> rootDevices = new List<UPnPRootDevice>();
             List<string> responses = new List<string>();

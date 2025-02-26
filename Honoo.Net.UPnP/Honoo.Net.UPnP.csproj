@@ -16,7 +16,7 @@
 		<PackageTags>Honoo;UPnP;PortMapping;DLNA</PackageTags>
 		<AssemblyName>Honoo.Net.UPnP</AssemblyName>
 		<RootNamespace>Honoo.Net.UPnP</RootNamespace>
-		<Version>1.0.8</Version>
+		<Version>1.0.9</Version>
 		<PackageReadmeFile>Honoo.Net.UPnP.md</PackageReadmeFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<EnableNETAnalyzers>True</EnableNETAnalyzers>

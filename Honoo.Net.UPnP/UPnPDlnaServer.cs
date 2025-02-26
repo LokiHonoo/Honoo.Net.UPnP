@@ -220,7 +220,7 @@ namespace Honoo.Net.UPnP
             if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
             {
                 byte[] buffer = new byte[context.Request.ContentLength64];
-                context.Request.InputStream.Read(buffer, 0, buffer.Length);
+                _ = context.Request.InputStream.Read(buffer, 0, buffer.Length);
                 string response = Encoding.UTF8.GetString(buffer);
                 XmlDocument doc = new XmlDocument() { XmlResolver = null };
                 doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
