@@ -6,7 +6,6 @@
 		<ProductName>Honoo.Net.UPnP</ProductName>
 		<Authors>Loki Honoo</Authors>		
 		<Company>Loki Honoo</Company>		
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Copyright>Copyright (C) Loki Honoo 2021. All rights reserved.</Copyright>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>Honoo.Net.UPnP.snk</AssemblyOriginatorKeyFile>
@@ -27,6 +26,7 @@
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageOutputPath>D:\NuGetPackages</PackageOutputPath>
 	</PropertyGroup>
 	
