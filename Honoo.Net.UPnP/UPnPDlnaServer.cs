@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
@@ -17,6 +18,7 @@ namespace Honoo.Net.UPnP
         #region Properties
 
         private readonly Dictionary<string, UPnPEventCallback> _eventSubscribers = new Dictionary<string, UPnPEventCallback>();
+        private readonly HashAlgorithm _hash = HashAlgorithm.Create("SHA256");
         private readonly string _host;
         private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
         private int _counter;
@@ -35,8 +37,9 @@ namespace Honoo.Net.UPnP
         /// <summary>
         /// Initializes a new instance of the UPnPDlnaServer class. Need setup firewall. Administrator privileges are required.
         /// </summary>
-        /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. http://192.168.1.100:8080 .</param>
-        public UPnPDlnaServer(Uri localHost)
+        /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
+        /// <param name="start">Start HttpListener at now.</param>
+        public UPnPDlnaServer(Uri localHost, bool start = true)
         {
             if (localHost == null)
             {
@@ -48,8 +51,11 @@ namespace Honoo.Net.UPnP
                 AuthenticationSchemes = AuthenticationSchemes.Anonymous
             };
             _listener.Prefixes.Add(_host);
-            _listener.Start();
-            _listener.BeginGetContext(GottenContext, null);
+            if (start)
+            {
+                _listener.Start();
+                _listener.BeginGetContext(GottenContext, null);
+            }
         }
 
         /// <summary>
@@ -82,6 +88,7 @@ namespace Honoo.Net.UPnP
                     _eventSubscribers.Clear();
                     _media.Clear();
                 }
+                _hash.Dispose();
                 try
                 {
                     _listener.Close();
@@ -109,11 +116,10 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddEventSubscriber(UPnPEventCallback callback)
         {
             Uri uri = new Uri(_host + "subscriber" + _counter);
-            string url = uri.AbsoluteUri.ToLowerInvariant();
+            string url = uri.AbsoluteUri;
             _eventSubscribers.Add(url, callback);
             _counter++;
             return url;
@@ -125,7 +131,6 @@ namespace Honoo.Net.UPnP
         /// <param name="file">Local file full path to play.</param>
         /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         public string AddMedia(string file, bool checkFileExists = true)
         {
             if (string.IsNullOrWhiteSpace(file))
@@ -136,8 +141,9 @@ namespace Honoo.Net.UPnP
             {
                 throw new IOException("File not exists.");
             }
-            Uri uri = new Uri(_host + file.Replace(":", string.Empty).Replace("\\", "/"));
-            string url = uri.AbsoluteUri.ToLowerInvariant();
+            string id = Encoding.ASCII.GetString(_hash.ComputeHash(Encoding.UTF8.GetBytes(file)));
+            Uri uri = new Uri(_host + id);
+            string url = uri.AbsoluteUri;
             if (!_media.ContainsKey(url))
             {
                 _media.Add(url, file);
@@ -210,13 +216,11 @@ namespace Honoo.Net.UPnP
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:将字符串规范化为大写", Justification = "<挂起>")]
         private void GottenContext(IAsyncResult ar)
         {
             HttpListenerContext context = _listener.EndGetContext(ar);
             _listener.BeginGetContext(GottenContext, null);
-
-            string url = context.Request.Url.AbsoluteUri.ToLowerInvariant();
+            string url = context.Request.Url.AbsoluteUri;
             if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
             {
                 byte[] buffer = new byte[context.Request.ContentLength64];

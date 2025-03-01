@@ -100,6 +100,17 @@ namespace Honoo.Net.UPnP
         public const string URN_UPNP_SERVICE_WAN_PPP_CONNECTION_1 = "urn:schemas-upnp-org:service:WANPPPConnection:1";
 
         /// <summary>
+        /// Create a new instance of the UPnPDlnaServer class. Need setup firewall. Administrator privileges are required.
+        /// </summary>
+        /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
+        /// <param name="start">Start HttpListener at now.</param>
+        /// <returns></returns>
+        public static UPnPDlnaServer CreateDlnaServer(Uri localHost, bool start = true)
+        {
+            return new UPnPDlnaServer(localHost, start);
+        }
+
+        /// <summary>
         /// Discover UPnP devices.
         /// </summary>
         /// <param name="searchTarget">

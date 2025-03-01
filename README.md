@@ -3,6 +3,7 @@
 - [Honoo.Net.UPnP](#honoonetupnp)
   - [INTRODUCTION](#introduction)
   - [GUIDE](#guide)
+    - [GitHub](#github)
     - [NuGet](#nuget)
   - [USAGE](#usage)
     - [Namespace](#namespace)
@@ -15,6 +16,10 @@
 Simple UPnP. Provides port mapping, DLNA e.g..
 
 ## GUIDE
+
+### GitHub
+
+<https://github.com/LokiHonoo/Honoo.Net.UPnP/>
 
 ### NuGet
 
@@ -88,7 +93,7 @@ private static void TestDlna()
     //Console.WriteLine(service.GetCurrentTransportActions(0));
 
     // Need setup firewall. Administrator privileges are required.
-    UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.1.11:8080/"));
+    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"), true);
 
     //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
     //string sid = service.SetEventSubscription(callbackUrl, 3600);

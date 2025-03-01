@@ -76,7 +76,7 @@ namespace Test
             //Console.WriteLine(service.GetCurrentTransportActions(0));
 
             // Need setup firewall. Administrator privileges are required.
-            UPnPDlnaServer mediaServer = new UPnPDlnaServer(new Uri("http://192.168.18.4:8080/"));
+            UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.18.4:8080/"), true);
 
             string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
             string sid = service.SetEventSubscription(callbackUrl, 3600);
