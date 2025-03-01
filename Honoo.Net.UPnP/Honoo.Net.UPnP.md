@@ -4,7 +4,6 @@
   - [INTRODUCTION](#introduction)
   - [GUIDE](#guide)
     - [GitHub](#github)
-    - [NuGet](#nuget)
   - [USAGE](#usage)
     - [Namespace](#namespace)
     - [PortMapping](#portmapping)
@@ -20,10 +19,6 @@ Simple UPnP. Provides port mapping, DLNA e.g..
 ### GitHub
 
 <https://github.com/LokiHonoo/Honoo.Net.UPnP/>
-
-### NuGet
-
-<https://www.nuget.org/packages/Honoo.Net.UPnP/>
 
 ## USAGE
 
@@ -95,8 +90,8 @@ private static void TestDlna()
     // Need setup firewall. Administrator privileges are required.
     UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"), true);
 
-    //string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
-    //string sid = service.SetEventSubscription(callbackUrl, 3600);
+    string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
+    string sid = service.SetEventSubscription(callbackUrl, 3600);
 
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
     service.SetAVTransportURI(0, mediaUrl, string.Empty);
@@ -105,9 +100,22 @@ private static void TestDlna()
     Console.ReadKey(true);
     service.Stop(0);
     //
-    //service.RemoveEventSubscription(sid);
-    //mediaServer.RemoveEventSubscriber(callbackUrl);
+    service.RemoveEventSubscription(sid);
+    mediaServer.RemoveEventSubscriber(callbackUrl);
     mediaServer.Dispose();
+}
+
+private static void DlanEventCallback(UPnPEventMessage[] messages)
+{
+    foreach (var message in messages)
+    {
+        Console.WriteLine(DateTime.Now + " ====================================================");
+        Console.WriteLine(message.InstanceID);
+        foreach (KeyValuePair<string, string> change in message.Changes)
+        {
+            Console.WriteLine(change.Key + ":" + change.Value);
+        }
+    }
 }
 
 ```
