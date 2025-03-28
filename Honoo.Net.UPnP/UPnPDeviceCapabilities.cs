@@ -2,14 +2,14 @@
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP device capabilities.
     /// </summary>
     public sealed class UPnPDeviceCapabilities
     {
-        #region Properties
+        #region Members
 
         private readonly string _playMedia;
         private readonly string _recMedia;
@@ -30,7 +30,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public ICollection<string> RecQualityModes => _recQualityModes;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPDeviceCapabilities class.

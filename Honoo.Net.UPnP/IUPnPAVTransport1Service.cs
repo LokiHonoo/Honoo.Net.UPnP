@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP IGDv1 "urn:schemas-upnp-org:service:AVTransport:1" interface.

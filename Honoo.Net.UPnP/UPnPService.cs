@@ -5,20 +5,20 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP service. Convert to the interface to call the relevant method.
     /// </summary>
     public sealed class UPnPService :
         IUPnPService,
-        IUPnPWANConnection1Service,
+        IUPnPWANConnectionCommonService,
         IUPnPWANIPConnection1Service,
         IUPnPWANIPConnection2Service,
         IUPnPWANPPPConnection1Service,
         IUPnPAVTransport1Service
     {
-        #region Properties
+        #region Members
 
         private readonly string _controlUrl;
         private readonly string _eventSubUrl;
@@ -69,7 +69,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string ServiceType => _serviceType;
 
-        #endregion Properties
+        #endregion Members
 
         #region Construction
 
@@ -270,7 +270,7 @@ namespace Honoo.Net.UPnP
         /// <param name="description">Port mapping description.</param>
         /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnection1Service.AddPortMapping(string protocol,
+        void IUPnPWANConnectionCommonService.AddPortMapping(string protocol,
                                                       ushort externalPort,
                                                       IPAddress internalClient,
                                                       ushort internalPort,
@@ -302,7 +302,7 @@ namespace Honoo.Net.UPnP
         /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
         /// <param name="externalPort">The external port to delete mapping.</param>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnection1Service.DeletePortMapping(string protocol, ushort externalPort)
+        void IUPnPWANConnectionCommonService.DeletePortMapping(string protocol, ushort externalPort)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -337,7 +337,7 @@ namespace Honoo.Net.UPnP
         /// Force termination.
         /// </summary>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnection1Service.ForceTermination()
+        void IUPnPWANConnectionCommonService.ForceTermination()
         {
             PostAction("ForceTermination", null);
         }
@@ -347,7 +347,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPConnectionTypeInfo IUPnPWANConnection1Service.GetConnectionTypeInfo()
+        UPnPConnectionTypeInfo IUPnPWANConnectionCommonService.GetConnectionTypeInfo()
         {
             string response = PostAction("GetConnectionTypeInfo", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -364,7 +364,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        string IUPnPWANConnection1Service.GetExternalIPAddress()
+        string IUPnPWANConnectionCommonService.GetExternalIPAddress()
         {
             string response = PostAction("GetExternalIPAddress", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -382,7 +382,7 @@ namespace Honoo.Net.UPnP
         /// <param name="index">The index of entry.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPPortMappingEntry IUPnPWANConnection1Service.GetGenericPortMappingEntry(uint index)
+        UPnPPortMappingEntry IUPnPWANConnectionCommonService.GetGenericPortMappingEntry(uint index)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -432,7 +432,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPNatRsipStatus IUPnPWANConnection1Service.GetNATRSIPStatus()
+        UPnPNatRsipStatus IUPnPWANConnectionCommonService.GetNATRSIPStatus()
         {
             string response = PostAction("GetNATRSIPStatus", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -451,7 +451,7 @@ namespace Honoo.Net.UPnP
         /// <param name="externalPort">The external port to query.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPPortMappingEntry IUPnPWANConnection1Service.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
+        UPnPPortMappingEntry IUPnPWANConnectionCommonService.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -474,7 +474,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPStatusInfo IUPnPWANConnection1Service.GetStatusInfo()
+        UPnPStatusInfo IUPnPWANConnectionCommonService.GetStatusInfo()
         {
             string response = PostAction("GetStatusInfo", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -490,7 +490,7 @@ namespace Honoo.Net.UPnP
         /// Request connection.
         /// </summary>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnection1Service.RequestConnection()
+        void IUPnPWANConnectionCommonService.RequestConnection()
         {
             PostAction("RequestConnection", null);
         }
@@ -500,7 +500,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="connectionType">The connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".</param>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnection1Service.SetConnectionType(string connectionType)
+        void IUPnPWANConnectionCommonService.SetConnectionType(string connectionType)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {

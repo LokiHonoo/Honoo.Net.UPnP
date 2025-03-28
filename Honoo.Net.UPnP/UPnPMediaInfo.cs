@@ -2,14 +2,14 @@
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP media info.
     /// </summary>
     public sealed class UPnPMediaInfo
     {
-        #region Properties
+        #region Members
 
         private readonly string _currentURI;
         private readonly string _currentURIMetaData;
@@ -66,7 +66,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string WriteStatus => _writeStatus;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPMediaInfo class.

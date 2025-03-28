@@ -4,20 +4,20 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP root device.
     /// </summary>
     public sealed class UPnPRootDevice : IDisposable
     {
-        #region Properties
+        #region Members
 
         private readonly Uri _baseUri;
         private readonly WebClient _client;
         private readonly string _descriptionUrl;
         private readonly UPnPDevice _device;
-        private readonly IDictionary<string, string> _headerExtensions = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _headerExtensions = new Dictionary<string, string>();
         private readonly Version _specVersion;
         private bool _disposed;
 
@@ -54,7 +54,7 @@ namespace Honoo.Net.UPnP
 
         internal WebClient Client => _client;
 
-        #endregion Properties
+        #endregion Members
 
         #region Construction
 

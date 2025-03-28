@@ -1,14 +1,14 @@
 ﻿using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP transport settings.
     /// </summary>
     public sealed class UPnPTransportSettings
     {
-        #region Properties
+        #region Members
 
         private readonly string _playMode;
         private readonly string _recQualityMode;
@@ -24,7 +24,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string RecQualityMode => _recQualityMode;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPTransportSettings class.

@@ -3,14 +3,14 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP NAT RSIP status.
     /// </summary>
     public sealed class UPnPNatRsipStatus
     {
-        #region Properties
+        #region Members
 
         private readonly bool _natEnabled;
         private readonly bool _rsipAvailable;
@@ -25,7 +25,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public bool RsipAvailable => _rsipAvailable;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the NatRsipStatus class.

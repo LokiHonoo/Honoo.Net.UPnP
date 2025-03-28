@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP device.
     /// </summary>
     public sealed class UPnPDevice : IUPnPDevice, IUPnPMediaRenderer1Device
     {
-        #region Properties
+        #region Members
 
         private readonly UPnPDevice[] _devices;
         private readonly string _deviceType;
@@ -120,7 +120,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         string IUPnPMediaRenderer1Device.XDlnaDoc => _xDlnaDoc;
 
-        #endregion Properties
+        #endregion Members
 
         #region Construction
 

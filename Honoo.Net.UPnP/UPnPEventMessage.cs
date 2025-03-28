@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP event subscription response message.
     /// </summary>
     public sealed class UPnPEventMessage
     {
-        #region Properties
+        #region Members
 
         private readonly IDictionary<string, string> _changes;
         private readonly uint _instanceID;
@@ -22,7 +22,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public uint InstanceID => _instanceID;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPEventMessage class.

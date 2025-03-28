@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP IGDv2 "urn:schemas-upnp-org:service:WANIPConnection:2" interface.

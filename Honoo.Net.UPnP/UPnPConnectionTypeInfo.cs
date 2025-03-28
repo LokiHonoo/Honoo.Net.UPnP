@@ -2,14 +2,14 @@
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP connection type info.
     /// </summary>
     public sealed class UPnPConnectionTypeInfo
     {
-        #region Properties
+        #region Members
 
         private readonly string _connectionType;
         private readonly string[] _possibleConnectionTypes;
@@ -24,7 +24,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public ICollection<string> PossibleConnectionTypes => _possibleConnectionTypes;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPConnectionTypeInfo class.

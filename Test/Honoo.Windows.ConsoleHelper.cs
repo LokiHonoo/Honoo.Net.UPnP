@@ -13,7 +13,7 @@ namespace Honoo.Windows
     /// <summary>
     /// Windows 控制台控制。
     /// </summary>
-    public static class ConsoleHelper
+    internal static class ConsoleHelper
     {
         #region 快速编辑模式
 
@@ -38,7 +38,7 @@ namespace Honoo.Windows
         /// 关闭控制台快速编辑模式，防止阻塞现象。
         /// </summary>
         /// <returns></returns>
-        public static bool DisableQuickEditMode()
+        internal static bool DisableQuickEditMode()
         {
             IntPtr hStdin = GetStdHandle(STD_INPUT_HANDLE);
             if (GetConsoleMode(hStdin, out uint mode))
@@ -54,7 +54,7 @@ namespace Honoo.Windows
         /// 开启控制台快速编辑模式。
         /// </summary>
         /// <returns></returns>
-        public static bool EnableQuickEditMode()
+        internal static bool EnableQuickEditMode()
         {
             IntPtr hStdin = GetStdHandle(STD_INPUT_HANDLE);
             if (GetConsoleMode(hStdin, out uint mode))
@@ -72,7 +72,7 @@ namespace Honoo.Windows
 
         #region Native
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(CtrlHandlerRoutine routine, bool add);
 
         #endregion Native
@@ -82,14 +82,14 @@ namespace Honoo.Windows
         /// </summary>
         /// <param name="ctrlType">控制信号的类型。</param>
         /// <returns></returns>
-        public delegate bool CtrlHandlerRoutine(int ctrlType);
+        internal delegate bool CtrlHandlerRoutine(int ctrlType);
 
         /// <summary>
         /// 设置控制信号的处理方法。
         /// </summary>
         /// <param name="routine">处理方法。方法包含一个参数，表示控制信号的类型。</param>
         /// <returns></returns>
-        public static bool AddCtrlHandler(CtrlHandlerRoutine routine)
+        internal static bool AddCtrlHandler(CtrlHandlerRoutine routine)
         {
             return SetConsoleCtrlHandler(routine, true);
         }
@@ -99,7 +99,7 @@ namespace Honoo.Windows
         /// </summary>
         /// <param name="routine">处理方法。方法包含一个参数，表示控制信号的类型。</param>
         /// <returns></returns>
-        public static bool RemoveCtrlHandler(CtrlHandlerRoutine routine)
+        internal static bool RemoveCtrlHandler(CtrlHandlerRoutine routine)
         {
             return SetConsoleCtrlHandler(routine, false);
         }

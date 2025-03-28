@@ -1,14 +1,14 @@
 ﻿using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP transport info.
     /// </summary>
     public sealed class UPnPTransportInfo
     {
-        #region Properties
+        #region Members
 
         private readonly string _currentSpeed;
         private readonly string _currentTransportState;
@@ -30,7 +30,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string CurrentTransportStatus => _currentTransportStatus;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPTransportInfo class.

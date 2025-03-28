@@ -1,4 +1,4 @@
-﻿namespace Honoo.Net.UPnP
+﻿namespace Honoo.Net
 {
     /// <summary>
     /// UPnP service interfaces.
@@ -7,12 +7,11 @@
     {
         internal UPnPServiceInterfaces(UPnPService service)
         {
-            this.Interface = service;
-            this.WANConnection1 = service;
+            this.MainInterface = service;
+            this.AVTransport1 = service;
             this.WANIPConnection1 = service;
             this.WANIPConnection2 = service;
             this.WANPPPConnection1 = service;
-            this.AVTransport1 = service;
         }
 
         /// <summary>
@@ -23,12 +22,7 @@
         /// <summary>
         /// Gets main interface.
         /// </summary>
-        public IUPnPService Interface { get; }
-
-        /// <summary>
-        /// Gets WANConnection1 interface.
-        /// </summary>
-        public IUPnPWANConnection1Service WANConnection1 { get; }
+        public IUPnPService MainInterface { get; }
 
         /// <summary>
         /// Gets WANIPConnection1 interface.

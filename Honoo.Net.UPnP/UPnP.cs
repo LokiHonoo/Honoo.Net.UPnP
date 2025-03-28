@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP discoverer.
@@ -100,7 +100,7 @@ namespace Honoo.Net.UPnP
         public const string URN_UPNP_SERVICE_WAN_PPP_CONNECTION_1 = "urn:schemas-upnp-org:service:WANPPPConnection:1";
 
         /// <summary>
-        /// Create a new instance of the UPnPDlnaServer class. Need setup firewall. Administrator privileges are required.
+        /// Create a new instance of the UPnPDlnaServer class. Need setup port open for firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
         /// <param name="start">Start HttpListener at now.</param>
@@ -108,6 +108,17 @@ namespace Honoo.Net.UPnP
         public static UPnPDlnaServer CreateDlnaServer(Uri localHost, bool start = true)
         {
             return new UPnPDlnaServer(localHost, start);
+        }
+
+        /// <summary>
+        /// Create a new instance of the UPnPEventSubscriber class. Need setup port open for firewall. Administrator privileges are required.
+        /// </summary>
+        /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
+        /// <param name="start">Start HttpListener at now.</param>
+        /// <returns></returns>
+        public static UPnPEventSubscriber CreateventSubscriber(Uri localHost, bool start = true)
+        {
+            return new UPnPEventSubscriber(localHost, start);
         }
 
         /// <summary>

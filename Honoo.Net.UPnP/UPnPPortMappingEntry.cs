@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP port mapping entry.
@@ -19,7 +19,7 @@ namespace Honoo.Net.UPnP
         private readonly string _protocol;
         private readonly string _remoteHost;
 
-        #region Properties
+        #region Members
 
         /// <summary>
         /// Description.
@@ -61,7 +61,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string RemoteHost => _remoteHost;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the PortMappingEntry class.

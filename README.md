@@ -26,7 +26,7 @@ Simple UPnP. Provides port mapping, DLNA e.g..
 
 ```c#
 
-using Honoo.Net.UPnP;
+using Honoo.Net;
 
 ```
 
@@ -39,8 +39,8 @@ private static void TestPortMapping()
     UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
     UPnPRootDevice router = devices[0];
 
-    //var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
-    IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+    //IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+    var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
 
     //Console.WriteLine(service.GetNATRSIPStatus());
     //Console.WriteLine(service.GetExternalIPAddress());
@@ -77,8 +77,8 @@ private static void TestDlna()
 
     Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
 
-    //var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
-    IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    //IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+    var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
 
     //Console.WriteLine(service.GetDeviceCapabilities(0));
     //Console.WriteLine(service.GetTransportSettings(0));
@@ -89,8 +89,9 @@ private static void TestDlna()
 
     // Need setup firewall. Administrator privileges are required.
     UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"), true);
+    mediaServer.RequestFailed += MediaServer_RequestFailed;
 
-    string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
+    string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventRaisedCallback);
     string sid = service.SetEventSubscription(callbackUrl, 3600);
 
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
@@ -105,7 +106,12 @@ private static void TestDlna()
     mediaServer.Dispose();
 }
 
-private static void DlanEventCallback(UPnPEventMessage[] messages)
+private static void MediaServer_RequestFailed(UPnPServer server, HttpListenerRequest request, Exception exception)
+{
+    Console.WriteLine(exception.ToString());
+}
+
+private static void UPnPEventRaisedCallback(UPnPEventMessage[] messages)
 {
     foreach (var message in messages)
     {

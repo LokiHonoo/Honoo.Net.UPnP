@@ -1,4 +1,4 @@
-﻿using Honoo.Net.UPnP;
+﻿using Honoo.Net;
 using Honoo.Windows;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace Test
 {
     internal class Program
     {
-        private static void DlanEventCallback(UPnPEventMessage[] messages)
+        private static void UPnPEventRaisedCallback(UPnPServer server, UPnPEventMessage[] messages)
         {
             foreach (var message in messages)
             {
@@ -58,6 +58,11 @@ namespace Test
             }
         }
 
+        private static void MediaServer_RequestFailed(UPnPServer server, HttpListenerRequest request, Exception exception)
+        {
+            Console.WriteLine(exception.ToString());
+        }
+
         private static void TestDlna()
         {
             UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
@@ -65,8 +70,7 @@ namespace Test
 
             Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
 
-            //var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
-            IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+            var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
 
             //Console.WriteLine(service.GetDeviceCapabilities(0));
             //Console.WriteLine(service.GetTransportSettings(0));
@@ -75,10 +79,11 @@ namespace Test
             //Console.WriteLine(service.GetTransportInfo(0));
             //Console.WriteLine(service.GetCurrentTransportActions(0));
 
-            // Need setup firewall. Administrator privileges are required.
-            UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.18.4:8080/"), true);
+            // Need setup port open for firewall. Administrator privileges are required.
+            UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"), true);
+            mediaServer.RequestFailed += MediaServer_RequestFailed;
 
-            string callbackUrl = mediaServer.AddEventSubscriber(DlanEventCallback);
+            string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventRaisedCallback);
             string sid = service.SetEventSubscription(callbackUrl, 3600);
 
             string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
@@ -89,7 +94,7 @@ namespace Test
             service.Stop(0);
             //
             service.RemoveEventSubscription(sid);
-            //mediaServer.RemoveEventSubscriber(callbackUrl);
+            mediaServer.RemoveEventSubscriber(callbackUrl);
             mediaServer.Dispose();
         }
 
@@ -98,8 +103,7 @@ namespace Test
             UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
             UPnPRootDevice router = devices[0];
 
-            //var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
-            IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+            var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
 
             //Console.WriteLine(service.GetNATRSIPStatus());
             //Console.WriteLine(service.GetExternalIPAddress());

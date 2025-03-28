@@ -1,4 +1,4 @@
-﻿namespace Honoo.Net.UPnP
+﻿namespace Honoo.Net
 {
     /// <summary>
     /// UPnP IGDv1 "urn:schemas-upnp-org:device:MediaRenderer:1" interface.

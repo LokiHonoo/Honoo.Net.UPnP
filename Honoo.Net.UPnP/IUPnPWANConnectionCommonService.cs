@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Net;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANConnection:1" interface.
+    /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANIPConnection:1", "urn:schemas-upnp-org:service:WANPPPConnection:1" interface.
     /// </summary>
-    public interface IUPnPWANConnection1Service : IUPnPService
+    public interface IUPnPWANConnectionCommonService : IUPnPService
     {
         /// <summary>
         /// Add port mapping.

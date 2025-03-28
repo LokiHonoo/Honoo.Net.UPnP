@@ -5,32 +5,26 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP DLNA media server.
-    /// <br/>Administrator privileges are required.
+    /// UPnP DLNA media server. Need setup port open for firewall. Administrator privileges are required.
     /// </summary>
-    public sealed class UPnPDlnaServer : IDisposable
+    public class UPnPDlnaServer : UPnPEventSubscriber
     {
-        #region Properties
+        #region Members
 
-        private readonly Dictionary<string, UPnPEventCallback> _eventSubscribers = new Dictionary<string, UPnPEventCallback>();
         private readonly HashAlgorithm _hash = HashAlgorithm.Create("SHA256");
-        private readonly string _host;
-        private readonly Dictionary<string, string> _media = new Dictionary<string, string>();
-        private int _counter;
+        private readonly Dictionary<string, Tuple<bool, string, Stream>> _media = new Dictionary<string, Tuple<bool, string, Stream>>();
         private bool _disposed;
-        private HttpListener _listener;
 
         /// <summary>
-        /// Gets a value that indecates whether HttpListener has been started.
+        /// Gets media count.
         /// </summary>
-        public bool IsListening => _listener.IsListening;
+        public int MediaCount => _media.Count;
 
-        #endregion Properties
+        #endregion Members
 
         #region Construction
 
@@ -39,124 +33,75 @@ namespace Honoo.Net.UPnP
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
         /// <param name="start">Start HttpListener at now.</param>
-        public UPnPDlnaServer(Uri localHost, bool start = true)
+        public UPnPDlnaServer(Uri localHost, bool start = true) : base(localHost, start)
         {
-            if (localHost == null)
-            {
-                throw new ArgumentNullException(nameof(localHost));
-            }
-            _host = localHost.AbsoluteUri;
-            _listener = new HttpListener
-            {
-                AuthenticationSchemes = AuthenticationSchemes.Anonymous
-            };
-            _listener.Prefixes.Add(_host);
-            if (start)
-            {
-                _listener.Start();
-                _listener.BeginGetContext(GottenContext, null);
-            }
-        }
-
-        /// <summary>
-        /// Releases resources at the instance.
-        /// </summary>
-        ~UPnPDlnaServer()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Releases resources at the instance.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
         /// Releases resources at the instance.
         /// </summary>
         /// <param name="disposing">Releases managed resources.</param>
-        private void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    _eventSubscribers.Clear();
                     _media.Clear();
                 }
                 _hash.Dispose();
-                try
-                {
-                    _listener.Close();
-                    _listener = null;
-                }
-                catch
-                {
-                }
                 _disposed = true;
             }
+            base.Dispose(disposing);
         }
 
         #endregion Construction
 
         /// <summary>
-        /// Shuts down, discarding all currently queued requests.
+        /// Add a media file and gets transport url.
         /// </summary>
-        public void Abort()
-        {
-            _listener.Abort();
-        }
-
-        /// <summary>
-        /// Add a event subscriber and gets event subscriber url.
-        /// </summary>
-        /// <param name="callback">UPnP event updated callback.</param>
+        /// <param name="mediaFile">Local file full path to play.</param>
+        /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
-        public string AddEventSubscriber(UPnPEventCallback callback)
+        public string AddMedia(string mediaFile, bool checkFileExists = true)
         {
-            Uri uri = new Uri(_host + "subscriber" + _counter);
+            if (string.IsNullOrWhiteSpace(mediaFile))
+            {
+                throw new ArgumentException($"The invalid argument - {nameof(mediaFile)}.");
+            }
+            if (checkFileExists && !File.Exists(mediaFile))
+            {
+                throw new IOException("File not exists.");
+            }
+            string id = Encoding.ASCII.GetString(_hash.ComputeHash(Encoding.UTF8.GetBytes(mediaFile)));
+            Uri uri = new Uri(base.Host + id);
             string url = uri.AbsoluteUri;
-            _eventSubscribers.Add(url, callback);
-            _counter++;
+            if (!_media.ContainsKey(url))
+            {
+                _media.Add(url, new Tuple<bool, string, Stream>(false, mediaFile, null));
+            }
             return url;
         }
 
         /// <summary>
         /// Add a media file and gets transport url.
         /// </summary>
-        /// <param name="file">Local file full path to play.</param>
-        /// <param name="checkFileExists">Check file exists.</param>
+        /// <param name="mediaStream">Media cache to play.</param>
         /// <returns></returns>
-        public string AddMedia(string file, bool checkFileExists = true)
+        public string AddMedia(Stream mediaStream)
         {
-            if (string.IsNullOrWhiteSpace(file))
+            if (mediaStream is null)
             {
-                throw new ArgumentException($"The invalid argument - {nameof(file)}.");
+                throw new ArgumentNullException(nameof(mediaStream));
             }
-            if (checkFileExists && !File.Exists(file))
-            {
-                throw new IOException("File not exists.");
-            }
-            string id = Encoding.ASCII.GetString(_hash.ComputeHash(Encoding.UTF8.GetBytes(file)));
-            Uri uri = new Uri(_host + id);
+            string id = Encoding.ASCII.GetString(_hash.ComputeHash(mediaStream));
+            Uri uri = new Uri(base.Host + id);
             string url = uri.AbsoluteUri;
             if (!_media.ContainsKey(url))
             {
-                _media.Add(url, file);
+                _media.Add(url, new Tuple<bool, string, Stream>(false, string.Empty, mediaStream));
             }
             return url;
-        }
-
-        /// <summary>
-        /// Removes all event subscribers.
-        /// </summary>
-        public void ClearEventSubscribers()
-        {
-            _eventSubscribers.Clear();
         }
 
         /// <summary>
@@ -165,23 +110,6 @@ namespace Honoo.Net.UPnP
         public void ClearMedia()
         {
             _media.Clear();
-        }
-
-        /// <summary>
-        /// Shuts down.
-        /// </summary>
-        public void Close()
-        {
-            _listener.Close();
-        }
-
-        /// <summary>
-        /// Removes specified event subscriber.
-        /// </summary>
-        /// <param name="url">The url of the element to remove.</param>
-        public void RemoveEventSubscriber(string url)
-        {
-            _eventSubscribers.Remove(url);
         }
 
         /// <summary>
@@ -194,98 +122,91 @@ namespace Honoo.Net.UPnP
         }
 
         /// <summary>
-        /// Allows this instance to receive incoming requests.
+        ///
         /// </summary>
-        public void Start()
+        /// <param name="context"></param>
+        /// <param name="url"></param>
+        /// <param name="exception"></param>
+        /// <param name="handled"></param>
+        protected override void HandleContext(HttpListenerContext context, string url, out Exception exception, out bool handled)
         {
-            if (!_listener.IsListening)
+            base.HandleContext(context, url, out exception, out handled);
+            if (!handled)
             {
-                _listener.Start();
-                _listener.BeginGetContext(GottenContext, null);
-            }
-        }
-
-        /// <summary>
-        /// This instance is not allowed to receive incoming requests.
-        /// </summary>
-        public void Stop()
-        {
-            if (_listener.IsListening)
-            {
-                _listener.Stop();
-            }
-        }
-
-        private void GottenContext(IAsyncResult ar)
-        {
-            HttpListenerContext context = _listener.EndGetContext(ar);
-            _listener.BeginGetContext(GottenContext, null);
-            string url = context.Request.Url.AbsoluteUri;
-            if (_eventSubscribers.TryGetValue(url, out UPnPEventCallback callback))
-            {
-                byte[] buffer = new byte[context.Request.ContentLength64];
-                _ = context.Request.InputStream.Read(buffer, 0, buffer.Length);
-                string response = Encoding.UTF8.GetString(buffer);
-                XmlDocument doc = new XmlDocument() { XmlResolver = null };
-                doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
-                //StringReader sreader = new StringReader(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
-                //using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings() { XmlResolver = null }))
-                //{
-                //    doc.Load(reader);
-                //}
-                XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-                ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
-                ns.AddNamespace("avt", "urn:schemas-upnp-org:metadata-1-0/AVT/");
-                XmlNodeList instances = doc.SelectNodes("/propertyset/property/LastChange/avt:Event/avt:InstanceID", ns);
-                List<UPnPEventMessage> messages = new List<UPnPEventMessage>();
-                foreach (XmlNode instance in instances)
+                if (context is null)
                 {
-                    uint instanceID = uint.Parse(instance.Attributes["val"].InnerText, CultureInfo.InvariantCulture);
-                    Dictionary<string, string> changes = new Dictionary<string, string>();
-                    foreach (XmlNode node in instance.ChildNodes)
-                    {
-                        changes.Add(node.LocalName, node.Attributes["val"].InnerText);
-                    }
-                    messages.Add(new UPnPEventMessage(instanceID, changes));
+                    exception = new ArgumentNullException(nameof(context));
+                    handled = true;
                 }
-                callback?.Invoke(messages.ToArray());
-            }
-            else if (_media.TryGetValue(url, out string file))
-            {
-                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                else if (_media.TryGetValue(url, out Tuple<bool, string, Stream> data))
                 {
                     string range = context.Request.Headers["Range"];
-                    if (range != null)
+                    try
                     {
-                        range = range.ToUpperInvariant().Replace("BYTES=", string.Empty).TrimEnd('-');
-                        long position = long.Parse(range, CultureInfo.InvariantCulture);
-                        context.Response.StatusCode = 206;
-                        context.Response.Headers.Add("Cache-Control: no-store");
-                        context.Response.Headers.Add("Pragma: no-cache");
-                        context.Response.Headers.Add("Connection: Keep=Alive");
-                        context.Response.Headers.Add("transferMode.dlna.org: Streaming");
-                        //context.Response.Headers.Add("Content-Type: application/octet-stream");
-                        context.Response.Headers.Add("Accept-Ranges: bytes");
-                        context.Response.ContentLength64 = stream.Length - position;
-                        context.Response.Headers.Add($"Content-Range: bytes {range}/{stream.Length}");
-                        stream.Seek(position, SeekOrigin.Begin);
-                        stream.CopyTo(context.Response.OutputStream);
+                        if (data.Item1)
+                        {
+                            Transport(data.Item3, range, context.Response);
+                        }
+                        else
+                        {
+                            using (FileStream media = new FileStream(data.Item2, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            {
+                                Transport(media, range, context.Response);
+                            }
+                        }
+                        exception = null;
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        context.Response.StatusCode = 200;
-                        context.Response.Headers.Add("Cache-Control: no-store");
-                        context.Response.Headers.Add("Pragma: no-cache");
-                        context.Response.Headers.Add("Connection: Keep=Alive");
-                        context.Response.Headers.Add("transferMode.dlna.org: Streaming");
-                        //context.Response.Headers.Add("Content-Type: application/octet-stream");
-                        stream.Seek(0, SeekOrigin.Begin);
-                        stream.CopyTo(context.Response.OutputStream);
+                        exception = ex;
                     }
+                    try
+                    {
+                        context.Response.OutputStream.Flush();
+                        context.Response.OutputStream.Close();
+                    }
+                    catch
+                    {
+                        // exception = null;
+                    }
+                    handled = true;
                 }
-                context.Response.OutputStream.Flush();
-                context.Response.OutputStream.Close();
-                context.Response.Close();
+                else
+                {
+                    exception = null;
+                    handled = false;
+                }
+            }
+        }
+
+        private static void Transport(Stream media, string range, HttpListenerResponse response)
+        {
+            if (range != null)
+            {
+                range = range.ToUpperInvariant().Replace("BYTES=", string.Empty).TrimEnd('-');
+                long position = long.Parse(range, CultureInfo.InvariantCulture);
+                response.StatusCode = 206;
+                response.Headers.Add("Cache-Control: no-store");
+                response.Headers.Add("Pragma: no-cache");
+                response.Headers.Add("Connection: Keep=Alive");
+                response.Headers.Add("transferMode.dlna.org: Streaming");
+                //response.Headers.Add("Content-Type: application/octet-stream");
+                response.Headers.Add("Accept-Ranges: bytes");
+                response.ContentLength64 = media.Length - position;
+                response.Headers.Add($"Content-Range: bytes {range}/{media.Length}");
+                media.Seek(position, SeekOrigin.Begin);
+                media.CopyTo(response.OutputStream);
+            }
+            else
+            {
+                response.StatusCode = 200;
+                response.Headers.Add("Cache-Control: no-store");
+                response.Headers.Add("Pragma: no-cache");
+                response.Headers.Add("Connection: Keep=Alive");
+                response.Headers.Add("transferMode.dlna.org: Streaming");
+                //response.Headers.Add("Content-Type: application/octet-stream");
+                media.Seek(0, SeekOrigin.Begin);
+                media.CopyTo(response.OutputStream);
             }
         }
     }

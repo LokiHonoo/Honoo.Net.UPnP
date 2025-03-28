@@ -2,14 +2,14 @@
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP position info.
     /// </summary>
     public sealed class UPnPPositionInfo
     {
-        #region Properties
+        #region Members
 
         private readonly int _absCount;
         private readonly string _absTime;
@@ -60,7 +60,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string TrackURI => _trackURI;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPPositionInfo class.

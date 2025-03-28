@@ -1,4 +1,4 @@
-﻿namespace Honoo.Net.UPnP
+﻿namespace Honoo.Net
 {
     /// <summary>
     /// UPnP device interfaces.
@@ -7,14 +7,14 @@
     {
         internal UPnPDeviceInterfaces(UPnPDevice device)
         {
-            this.Interface = device;
+            this.MainInterface = device;
             this.MediaRenderer1 = device;
         }
 
         /// <summary>
         /// Gets main interface.
         /// </summary>
-        public IUPnPDevice Interface { get; }
+        public IUPnPDevice MainInterface { get; }
 
         /// <summary>
         /// Gets MediaRenderer1 interface.

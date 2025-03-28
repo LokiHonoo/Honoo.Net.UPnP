@@ -2,14 +2,14 @@
 using System.Text;
 using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP status info.
     /// </summary>
     public sealed class UPnPStatusInfo
     {
-        #region Properties
+        #region Members
 
         private readonly string _connectionStatus;
         private readonly string _lastConnectionError;
@@ -36,7 +36,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public uint Uptime => _uptime;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPStatusInfo class.

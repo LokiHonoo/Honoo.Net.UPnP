@@ -1,13 +1,13 @@
 ﻿using System.Xml;
 
-namespace Honoo.Net.UPnP
+namespace Honoo.Net
 {
     /// <summary>
     /// UPnP icon.
     /// </summary>
     public sealed class UPnPIcon
     {
-        #region Properties
+        #region Members
 
         private readonly string _depth;
         private readonly string _height;
@@ -52,7 +52,7 @@ namespace Honoo.Net.UPnP
         /// </summary>
         public string Width => _width;
 
-        #endregion Properties
+        #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPIcon class.
