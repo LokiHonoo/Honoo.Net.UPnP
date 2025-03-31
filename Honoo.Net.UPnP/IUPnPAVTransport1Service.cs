@@ -4,6 +4,7 @@ namespace Honoo.Net
 {
     /// <summary>
     /// UPnP IGDv1 "urn:schemas-upnp-org:service:AVTransport:1" interface.
+    /// <br />USAGE: <see href="https://upnp.org/specs/av/UPnP-av-AVTransport-v1-Service.pdf"/>
     /// </summary>
     public interface IUPnPAVTransport1Service : IUPnPService
     {
@@ -86,16 +87,28 @@ namespace Honoo.Net
         void Previous(uint instanceID);
 
         /// <summary>
-        /// Seek.
+        /// Record. whether the device outputs the resource to a screen or speakers while recording is device dependent.
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
-        /// <param name="unit">The seek mode. This property accepts the following: "REL_TIME", "TRACK_NR".</param>
+        /// <exception cref="Exception"/>
+        void Record(uint instanceID);
+
+        /// <summary>
+        /// Seek. This state variable is introduced to provide type information for the “target” parameter in action “Seek”. It
+        /// <br />indicates the target position of the seek action, in terms of units defined by state variable A_ARG_TYPE_SeekMode.
+        /// <br />The data type of this variable is ‘string’. However, depending on the actual seek mode used, it must contains
+        /// <br />string representations of values of UPnP types ‘ui4’ (ABS_COUNT, REL_COUNT, TRACK_NR, TAPE-INDEX, FRAME),
+        /// <br />‘time’ (ABS_TIME, REL_TIME) or ‘float‘ (CHANNEL_FREQ, in Hz). Supported ranges of these integer, time or float
+        /// <br />values are device-dependent.
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <param name="unit">The seek mode.</param>
         /// <param name="target">Target by seek mode. REL_TIME: 00:33:33, TRACK_NR(Track number of CD-DA): 1.</param>
         /// <exception cref="Exception"/>
         void Seek(uint instanceID, string unit, string target);
 
         /// <summary>
-        /// Set audio/video transport uri. Need DLNA http server. Use "UPnPDlnaServer" or design by youself.
+        /// Set audio/video transport uri. Need DLNA http server. Used by "UPnPDlnaServer" or design by youself.
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <param name="currentURI">Current audio/video transport uri.</param>
@@ -108,7 +121,7 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <param name="playMode"> Current play mode. This property accepts the following:
-        /// "NORMAL", "REPEAT_ONE", "REPEAT_ALL", "SHUFFLE", "SHUFFLE_NOREPEAT".</param>
+        /// "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO".</param>
         /// <exception cref="Exception"/>
         void SetPlayMode(uint instanceID, string playMode);
 

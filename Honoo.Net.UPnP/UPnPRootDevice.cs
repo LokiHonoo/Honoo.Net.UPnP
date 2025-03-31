@@ -43,7 +43,7 @@ namespace Honoo.Net
         /// <br/>"Content-Type: text/xml; charset=utf-8"
         /// <br/>"User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
         /// <br/>
-        /// <br/>Append MAN HTTP Header If throw 405 WebException. MAN: "http://schemas.xmlsoap.org/soap/envelope/"; ns=01
+        /// <br/>Append MAN HTTP Header If throw 405 WebException. <see cref="HeaderExtensions"/>.Add("MAN", "\"http://schemas.xmlsoap.org/soap/envelope/\"; ns=01"
         /// </summary>
         public IDictionary<string, string> HeaderExtensions => _headerExtensions;
 
@@ -134,7 +134,8 @@ namespace Honoo.Net
         /// <summary>
         /// Find the specified type of device if this device contains, else return "null".
         /// </summary>
-        /// <param name="deviceType">Device type.</param>
+        /// <param name="deviceType">Device type. Can used URN string as "urn:schemas-upnp-org:device:WANConnectionDevice:1".
+        ///</param>
         /// <returns></returns>
         public UPnPDevice FindDevice(string deviceType)
         {
@@ -144,7 +145,8 @@ namespace Honoo.Net
         /// <summary>
         /// Find the specified type of service if this device provides, else return "null".
         /// </summary>
-        /// <param name="serviceType">Service type.</param>
+        /// <param name="serviceType">Service type. Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
+        ///</param>
         /// <returns></returns>
         public UPnPService FindService(string serviceType)
         {

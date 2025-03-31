@@ -122,16 +122,23 @@ namespace Honoo.Net
         /// <summary>
         /// Discover UPnP devices.
         /// </summary>
+        /// <param name="timeout">Response timeout.</param>
         /// <param name="searchTarget">
         /// Http header "ST". Look this: <see cref="UPNP_ROOT_DEVICE"/> and so on.
         /// <br/>Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
         /// <br/>Can used UUID string as "uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".
         /// </param>
-        /// <param name="mxSeconds">Maximum response timeout. Unit is seconds.</param>
-        /// <param name="durationMilliseconds">Search duration. Unit is milliseconds.</param>
         /// <returns></returns>
-        public static UPnPRootDevice[] Discover(string searchTarget = UPNP_ROOT_DEVICE, int mxSeconds = 2, int durationMilliseconds = 2000)
+        public static UPnPRootDevice[] Discover(TimeSpan timeout, string searchTarget = UPNP_ROOT_DEVICE)
         {
+            if (timeout.Milliseconds < 1000)
+            {
+                timeout = TimeSpan.FromMilliseconds(1000);
+            }
+            if (string.IsNullOrWhiteSpace(searchTarget))
+            {
+                throw new ArgumentException($"“{nameof(searchTarget)}”cannot null or white space.", nameof(searchTarget));
+            }
             List<UPnPRootDevice> rootDevices = new List<UPnPRootDevice>();
             List<string> responses = new List<string>();
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
@@ -143,7 +150,7 @@ namespace Honoo.Net
                 request.AppendLine("Pragma: no-cache");
                 request.AppendLine("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
                 request.AppendLine("MAN: \"ssdp:discover\"");
-                request.AppendLine($"MX: {mxSeconds}");
+                request.AppendLine($"MX: {timeout.Seconds}");
                 request.AppendLine($"ST: {searchTarget}");
                 // request.AppendLine("ST: ssdp:all");
                 // request.AppendLine("ST: upnp:rootdevice");
@@ -153,7 +160,7 @@ namespace Honoo.Net
                 byte[] requestBytes = Encoding.UTF8.GetBytes(request.ToString());
                 //
                 EndPoint ep = new IPEndPoint(IPAddress.Parse("239.255.255.250"), 1900);
-                socket.ReceiveTimeout = durationMilliseconds;
+                socket.ReceiveTimeout = timeout.Milliseconds + 500;
                 socket.EnableBroadcast = true;
                 socket.MulticastLoopback = false;
                 socket.Bind(new IPEndPoint(IPAddress.Any, 0));

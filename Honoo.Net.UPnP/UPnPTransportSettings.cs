@@ -15,7 +15,7 @@ namespace Honoo.Net
 
         /// <summary>
         /// Current play mode. This property accepts the following:
-        /// "NORMAL", "REPEAT_ONE", "REPEAT_ALL", "SHUFFLE", "SHUFFLE_NOREPEAT".
+        /// "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO".
         /// </summary>
         public string PlayMode => _playMode;
 

@@ -12,11 +12,11 @@ namespace Honoo.Net
     /// </summary>
     public sealed class UPnPService :
         IUPnPService,
-        IUPnPWANConnectionCommonService,
         IUPnPWANIPConnection1Service,
         IUPnPWANIPConnection2Service,
         IUPnPWANPPPConnection1Service,
-        IUPnPAVTransport1Service
+        IUPnPAVTransport1Service,
+        IUPnPAVTransport2Service
     {
         #region Members
 
@@ -212,7 +212,212 @@ namespace Honoo.Net
 
         #endregion Common
 
-        #region PortMapping
+        #region WANIPConnection1
+
+        /// <summary>
+        /// Add port mapping.
+        /// </summary>
+        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="externalPort">The external port to mapping.</param>
+        /// <param name="internalClient">The internal client to mapping.</param>
+        /// <param name="internalPort">The internal port to mapping.</param>
+        /// <param name="enabled">Enabled.</param>
+        /// <param name="description">Port mapping description.</param>
+        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
+        /// <exception cref="Exception"/>
+        void IUPnPWANIPConnection1Service.AddPortMapping(string protocol,
+                                                         ushort externalPort,
+                                                         IPAddress internalClient,
+                                                         ushort internalPort,
+                                                         bool enabled,
+                                                         string description,
+                                                         uint leaseDuration)
+        {
+            if (internalClient is null)
+            {
+                throw new ArgumentNullException(nameof(internalClient));
+            }
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewProtocol", protocol },
+                { "NewRemoteHost", string.Empty },
+                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
+                { "NewInternalClient", internalClient.ToString() },
+                { "NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture) },
+                { "NewEnabled", enabled ? "1" : "0" },
+                { "NewPortMappingDescription", description },
+                { "NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("AddPortMapping", arguments);
+        }
+
+        /// <summary>
+        /// Delete port mapping.
+        /// </summary>
+        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="externalPort">The external port to delete mapping.</param>
+        /// <exception cref="Exception"/>
+        void IUPnPWANIPConnection1Service.DeletePortMapping(string protocol, ushort externalPort)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewProtocol", protocol },
+                { "NewRemoteHost", string.Empty },
+                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("DeletePortMapping", arguments);
+        }
+
+        /// <summary>
+        /// Force termination.
+        /// </summary>
+        /// <exception cref="Exception"/>
+        void IUPnPWANIPConnection1Service.ForceTermination()
+        {
+            PostAction("ForceTermination", null);
+        }
+
+        /// <summary>
+        /// Get Connection type info. Possible types maybe wrong because I don't know what the separator is. :(
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPConnectionTypeInfo IUPnPWANIPConnection1Service.GetConnectionTypeInfo()
+        {
+            string response = PostAction("GetConnectionTypeInfo", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetConnectionTypeInfoResponse", ns);
+            return new UPnPConnectionTypeInfo(node);
+        }
+
+        /// <summary>
+        /// Get external IPAddress.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        string IUPnPWANIPConnection1Service.GetExternalIPAddress()
+        {
+            string response = PostAction("GetExternalIPAddress", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetExternalIPAddressResponse", ns);
+            return node.SelectSingleNode("NewExternalIPAddress").InnerText.Trim();
+        }
+
+        /// <summary>
+        /// Get generic port mapping entry.
+        /// </summary>
+        /// <param name="index">The index of entry.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPPortMappingEntry IUPnPWANIPConnection1Service.GetGenericPortMappingEntry(uint index)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetGenericPortMappingEntry", arguments);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetGenericPortMappingEntryResponse", ns);
+            return new UPnPPortMappingEntry(node);
+        }
+
+        /// <summary>
+        /// Get NAT RSIP status.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPNatRsipStatus IUPnPWANIPConnection1Service.GetNATRSIPStatus()
+        {
+            string response = PostAction("GetNATRSIPStatus", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetNATRSIPStatusResponse", ns);
+            return new UPnPNatRsipStatus(node);
+        }
+
+        /// <summary>
+        /// Get specific port mapping entry.
+        /// </summary>
+        /// <param name="protocol">The protocol to query. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="externalPort">The external port to query.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPPortMappingEntry IUPnPWANIPConnection1Service.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewProtocol", protocol },
+                { "NewRemoteHost", string.Empty },
+                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetSpecificPortMappingEntry", arguments);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetSpecificPortMappingEntryResponse", ns);
+            return new UPnPPortMappingEntry(protocol, string.Empty, externalPort, node);
+        }
+
+        /// <summary>
+        /// Get status info.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPStatusInfo IUPnPWANIPConnection1Service.GetStatusInfo()
+        {
+            string response = PostAction("GetStatusInfo", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetStatusInfoResponse", ns);
+            return new UPnPStatusInfo(node);
+        }
+
+        /// <summary>
+        /// Request connection.
+        /// </summary>
+        /// <exception cref="Exception"/>
+        void IUPnPWANIPConnection1Service.RequestConnection()
+        {
+            PostAction("RequestConnection", null);
+        }
+
+        /// <summary>
+        /// Set connection type.
+        /// </summary>
+        /// <param name="connectionType">The connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".</param>
+        /// <exception cref="Exception"/>
+        void IUPnPWANIPConnection1Service.SetConnectionType(string connectionType)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewConnectionType", connectionType },
+            };
+            PostAction("SetConnectionType", arguments);
+        }
+
+        #endregion WANIPConnection1
+
+        #region WANIPConnection2
 
         /// <summary>
         /// Add any port mapping, and gets reserved port.
@@ -260,60 +465,6 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Add port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to mapping.</param>
-        /// <param name="internalClient">The internal client to mapping.</param>
-        /// <param name="internalPort">The internal port to mapping.</param>
-        /// <param name="enabled">Enabled.</param>
-        /// <param name="description">Port mapping description.</param>
-        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
-        /// <exception cref="Exception"/>
-        void IUPnPWANConnectionCommonService.AddPortMapping(string protocol,
-                                                      ushort externalPort,
-                                                      IPAddress internalClient,
-                                                      ushort internalPort,
-                                                      bool enabled,
-                                                      string description,
-                                                      uint leaseDuration)
-        {
-            if (internalClient is null)
-            {
-                throw new ArgumentNullException(nameof(internalClient));
-            }
-            Dictionary<string, string> arguments = new Dictionary<string, string>
-            {
-                { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
-                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
-                { "NewInternalClient", internalClient.ToString() },
-                { "NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture) },
-                { "NewEnabled", enabled ? "1" : "0" },
-                { "NewPortMappingDescription", description },
-                { "NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture) },
-            };
-            PostAction("AddPortMapping", arguments);
-        }
-
-        /// <summary>
-        /// Delete port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to delete mapping.</param>
-        /// <exception cref="Exception"/>
-        void IUPnPWANConnectionCommonService.DeletePortMapping(string protocol, ushort externalPort)
-        {
-            Dictionary<string, string> arguments = new Dictionary<string, string>
-            {
-                { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
-                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
-            };
-            PostAction("DeletePortMapping", arguments);
-        }
-
-        /// <summary>
         /// Delete port mapping range.
         /// </summary>
         /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
@@ -331,71 +482,6 @@ namespace Honoo.Net
                 { "NewManage", manage ? "1" : "0" },
             };
             PostAction("DeletePortMappingRange", arguments);
-        }
-
-        /// <summary>
-        /// Force termination.
-        /// </summary>
-        /// <exception cref="Exception"/>
-        void IUPnPWANConnectionCommonService.ForceTermination()
-        {
-            PostAction("ForceTermination", null);
-        }
-
-        /// <summary>
-        /// Get Connection type info. Possible types maybe wrong because I don't know what the separator is. :(
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        UPnPConnectionTypeInfo IUPnPWANConnectionCommonService.GetConnectionTypeInfo()
-        {
-            string response = PostAction("GetConnectionTypeInfo", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetConnectionTypeInfoResponse", ns);
-            return new UPnPConnectionTypeInfo(node);
-        }
-
-        /// <summary>
-        /// Get external IPAddress.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        string IUPnPWANConnectionCommonService.GetExternalIPAddress()
-        {
-            string response = PostAction("GetExternalIPAddress", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetExternalIPAddressResponse", ns);
-            return node.SelectSingleNode("NewExternalIPAddress").InnerText.Trim();
-        }
-
-        /// <summary>
-        /// Get generic port mapping entry.
-        /// </summary>
-        /// <param name="index">The index of entry.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        UPnPPortMappingEntry IUPnPWANConnectionCommonService.GetGenericPortMappingEntry(uint index)
-        {
-            Dictionary<string, string> arguments = new Dictionary<string, string>
-            {
-                { "NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture) },
-            };
-            string response = PostAction("GetGenericPortMappingEntry", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetGenericPortMappingEntryResponse", ns);
-            return new UPnPPortMappingEntry(node);
         }
 
         /// <summary>
@@ -427,12 +513,135 @@ namespace Honoo.Net
             return node.SelectSingleNode("NewPortListing").InnerText.Trim();
         }
 
+        #endregion WANIPConnection2
+
+        #region WANPPPConnection1
+
+        /// <summary>
+        /// Add port mapping.
+        /// </summary>
+        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="externalPort">The external port to mapping.</param>
+        /// <param name="internalClient">The internal client to mapping.</param>
+        /// <param name="internalPort">The internal port to mapping.</param>
+        /// <param name="enabled">Enabled.</param>
+        /// <param name="description">Port mapping description.</param>
+        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
+        /// <exception cref="Exception"/>
+        void IUPnPWANPPPConnection1Service.AddPortMapping(string protocol,
+                                                          ushort externalPort,
+                                                          IPAddress internalClient,
+                                                          ushort internalPort,
+                                                          bool enabled,
+                                                          string description,
+                                                          uint leaseDuration)
+        {
+            if (internalClient is null)
+            {
+                throw new ArgumentNullException(nameof(internalClient));
+            }
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewProtocol", protocol },
+                { "NewRemoteHost", string.Empty },
+                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
+                { "NewInternalClient", internalClient.ToString() },
+                { "NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture) },
+                { "NewEnabled", enabled ? "1" : "0" },
+                { "NewPortMappingDescription", description },
+                { "NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("AddPortMapping", arguments);
+        }
+
+        /// <summary>
+        /// Delete port mapping.
+        /// </summary>
+        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="externalPort">The external port to delete mapping.</param>
+        /// <exception cref="Exception"/>
+        void IUPnPWANPPPConnection1Service.DeletePortMapping(string protocol, ushort externalPort)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewProtocol", protocol },
+                { "NewRemoteHost", string.Empty },
+                { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("DeletePortMapping", arguments);
+        }
+
+        /// <summary>
+        /// Force termination.
+        /// </summary>
+        /// <exception cref="Exception"/>
+        void IUPnPWANPPPConnection1Service.ForceTermination()
+        {
+            PostAction("ForceTermination", null);
+        }
+
+        /// <summary>
+        /// Get Connection type info. Possible types maybe wrong because I don't know what the separator is. :(
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPConnectionTypeInfo IUPnPWANPPPConnection1Service.GetConnectionTypeInfo()
+        {
+            string response = PostAction("GetConnectionTypeInfo", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetConnectionTypeInfoResponse", ns);
+            return new UPnPConnectionTypeInfo(node);
+        }
+
+        /// <summary>
+        /// Get external IPAddress.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        string IUPnPWANPPPConnection1Service.GetExternalIPAddress()
+        {
+            string response = PostAction("GetExternalIPAddress", null);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetExternalIPAddressResponse", ns);
+            return node.SelectSingleNode("NewExternalIPAddress").InnerText.Trim();
+        }
+
+        /// <summary>
+        /// Get generic port mapping entry.
+        /// </summary>
+        /// <param name="index">The index of entry.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPPortMappingEntry IUPnPWANPPPConnection1Service.GetGenericPortMappingEntry(uint index)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetGenericPortMappingEntry", arguments);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetGenericPortMappingEntryResponse", ns);
+            return new UPnPPortMappingEntry(node);
+        }
+
         /// <summary>
         /// Get NAT RSIP status.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPNatRsipStatus IUPnPWANConnectionCommonService.GetNATRSIPStatus()
+        UPnPNatRsipStatus IUPnPWANPPPConnection1Service.GetNATRSIPStatus()
         {
             string response = PostAction("GetNATRSIPStatus", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -451,7 +660,7 @@ namespace Honoo.Net
         /// <param name="externalPort">The external port to query.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPPortMappingEntry IUPnPWANConnectionCommonService.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
+        UPnPPortMappingEntry IUPnPWANPPPConnection1Service.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -474,7 +683,7 @@ namespace Honoo.Net
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPStatusInfo IUPnPWANConnectionCommonService.GetStatusInfo()
+        UPnPStatusInfo IUPnPWANPPPConnection1Service.GetStatusInfo()
         {
             string response = PostAction("GetStatusInfo", null);
             XmlDocument doc = new XmlDocument() { XmlResolver = null };
@@ -490,7 +699,7 @@ namespace Honoo.Net
         /// Request connection.
         /// </summary>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnectionCommonService.RequestConnection()
+        void IUPnPWANPPPConnection1Service.RequestConnection()
         {
             PostAction("RequestConnection", null);
         }
@@ -500,7 +709,7 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="connectionType">The connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".</param>
         /// <exception cref="Exception"/>
-        void IUPnPWANConnectionCommonService.SetConnectionType(string connectionType)
+        void IUPnPWANPPPConnection1Service.SetConnectionType(string connectionType)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -509,9 +718,9 @@ namespace Honoo.Net
             PostAction("SetConnectionType", arguments);
         }
 
-        #endregion PortMapping
+        #endregion WANPPPConnection1
 
-        #region DLNA
+        #region AVTransport1
 
         /// <summary>
         /// Get current transport actions.
@@ -710,11 +919,30 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Seek.
+        /// Record. whether the device outputs the resource to a screen or speakers while recording is device dependent.
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
-        /// <param name="unit">The seek mode. This property accepts the following: "REL_TIME", "TRACK_NR".</param>
-        /// <param name="target">Target by seek mode. for "REL_TIME" 00:33:33, for "TRACK_NR" 4.</param>
+        /// <exception cref="Exception"/>
+        void IUPnPAVTransport1Service.Record(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("Record", arguments);
+        }
+
+        /// <summary>
+        /// Seek. This state variable is introduced to provide type information for the “target” parameter in action “Seek”. It
+        /// <br />indicates the target position of the seek action, in terms of units defined by state variable A_ARG_TYPE_SeekMode.
+        /// <br />The data type of this variable is ‘string’. However, depending on the actual seek mode used, it must contains
+        /// <br />string representations of values of UPnP types ‘ui4’ (ABS_COUNT, REL_COUNT, TRACK_NR, TAPE-INDEX, FRAME),
+        /// <br />‘time’ (ABS_TIME, REL_TIME) or ‘float‘ (CHANNEL_FREQ, in Hz). Supported ranges of these integer, time or float
+        /// <br />values are device-dependent.
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <param name="unit">The seek mode.</param>
+        /// <param name="target">Target by seek mode. REL_TIME: 00:33:33, TRACK_NR(Track number of CD-DA): 1.</param>
         /// <exception cref="Exception"/>
         void IUPnPAVTransport1Service.Seek(uint instanceID, string unit, string target)
         {
@@ -728,7 +956,7 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Set audio/video transport uri. Need DLNA http server. Use "UPnPDlnaServer" or design by youself.
+        /// Set audio/video transport uri. Need DLNA http server. Used by "UPnPDlnaServer" or design by youself.
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <param name="currentURI">Current audio/video transport uri.</param>
@@ -751,7 +979,7 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
         /// <param name="playMode"> Current play mode. This property accepts the following:
-        /// "NORMAL", "REPEAT_ONE", "REPEAT_ALL", "SHUFFLE", "SHUFFLE_NOREPEAT".</param>
+        /// "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO".</param>
         /// <exception cref="Exception"/>
         void IUPnPAVTransport1Service.SetPlayMode(uint instanceID, string playMode)
         {
@@ -777,6 +1005,54 @@ namespace Honoo.Net
             PostAction("Stop", arguments);
         }
 
-        #endregion DLNA
+        #endregion AVTransport1
+
+        #region AVTransport2
+
+        /// <summary>
+        /// Get DRMState. This property accepts the following: "OK", "UNKNOWN", "PROCESSING_CONTENT_KEY", "CONTENT_KEY_FAILURE", "ATTEMPTING_AUTHENTICATION", "FAILED_AUTHENTICATION", "NOT_AUTHENTICATED", "DEVICE_REVOCATION".
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        string IUPnPAVTransport2Service.GetDRMState(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetDRMState", arguments);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetDRMStateResponse", ns);
+            return node.SelectSingleNode("CurrentDRMState").InnerText.Trim();
+        }
+
+        /// <summary>
+        /// Get media info ext.
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        UPnPMediaInfoExt IUPnPAVTransport2Service.GetMediaInfoExt(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetMediaInfo_Ext", arguments);
+            XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            doc.LoadXml(response);
+            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            ns.AddNamespace("u", _serviceType);
+            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetMediaInfo_ExtResponse", ns);
+            return new UPnPMediaInfoExt(node);
+        }
+
+        #endregion AVTransport2
     }
 }

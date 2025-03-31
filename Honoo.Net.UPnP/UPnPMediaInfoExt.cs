@@ -5,12 +5,16 @@ using System.Xml;
 namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP media info.
+    /// UPnP media info ext.
     /// </summary>
-    public sealed class UPnPMediaInfo
+    public sealed class UPnPMediaInfoExt
     {
         #region Members
 
+        //
+        //  CurrentType OUT CurrentMediaCategory
+
+        private readonly string _currentType;
         private readonly string _currentURI;
         private readonly string _currentURIMetaData;
         private readonly string _mediaDuration;
@@ -20,6 +24,11 @@ namespace Honoo.Net
         private readonly string _playMedium;
         private readonly string _recordMedium;
         private readonly string _writeStatus;
+
+        /// <summary>
+        /// Current media category.
+        /// </summary>
+        public string CurrentType => _currentType;
 
         /// <summary>
         /// Current audio/video transport uri.
@@ -52,7 +61,7 @@ namespace Honoo.Net
         public uint NrTracks => _nrTracks;
 
         /// <summary>
-        /// Playback storage medium.
+        /// Playback storage medium..
         /// </summary>
         public string PlayMedium => _playMedium;
 
@@ -69,11 +78,12 @@ namespace Honoo.Net
         #endregion Members
 
         /// <summary>
-        /// Initializes a new instance of the UPnPMediaInfo class.
+        /// Initializes a new instance of the UPnPMediaInfoExt class.
         /// </summary>
         /// <param name="node">Response node.</param>
-        internal UPnPMediaInfo(XmlNode node)
+        internal UPnPMediaInfoExt(XmlNode node)
         {
+            _currentType = node.SelectSingleNode("CurrentType").InnerText.Trim();
             _nrTracks = uint.Parse(node.SelectSingleNode("NrTracks").InnerText.Trim(), CultureInfo.InvariantCulture);
             _mediaDuration = node.SelectSingleNode("MediaDuration").InnerText.Trim();
             _currentURI = node.SelectSingleNode("CurrentURI").InnerText.Trim();
@@ -92,6 +102,7 @@ namespace Honoo.Net
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"CurrentType:{_currentType}");
             builder.AppendLine($"NrTracks:{_nrTracks}");
             builder.AppendLine($"MediaDuration:{_mediaDuration}");
             builder.AppendLine($"CurrentURI:{_currentURI}");

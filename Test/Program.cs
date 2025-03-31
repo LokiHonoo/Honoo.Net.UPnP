@@ -52,7 +52,7 @@ namespace Test
 
         private static void TestDlna()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
+            UPnPRootDevice[] devices = UPnP.Discover(TimeSpan.FromMilliseconds(2000), UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
             UPnPRootDevice dlna = devices[0];
 
             Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
@@ -91,7 +91,7 @@ namespace Test
 
         private static void TestPortMapping()
         {
-            UPnPRootDevice[] devices = UPnP.Discover(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
+            UPnPRootDevice[] devices = UPnP.Discover(TimeSpan.FromMilliseconds(2000), UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
             UPnPRootDevice router = devices[0];
 
             var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;

@@ -179,7 +179,8 @@ namespace Honoo.Net
         /// <summary>
         /// Find the specified type of device if this device contains, else return "null".
         /// </summary>
-        /// <param name="deviceType">Device type.</param>
+        /// <param name="deviceType">Device type. Can used URN string as "urn:schemas-upnp-org:device:WANConnectionDevice:1".
+        ///</param>
         /// <returns></returns>
         internal UPnPDevice FindDevice(string deviceType)
         {
@@ -205,7 +206,8 @@ namespace Honoo.Net
         /// <summary>
         /// Find the specified type of service if this device provides, else return "null".
         /// </summary>
-        /// <param name="serviceType">Service type.</param>
+        /// <param name="serviceType">Service type. Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
+        ///</param>
         /// <returns></returns>
         internal UPnPService FindService(string serviceType)
         {

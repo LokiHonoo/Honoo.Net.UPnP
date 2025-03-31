@@ -16,7 +16,7 @@ namespace Honoo.Net
         private readonly string[] _recQualityModes;
 
         /// <summary>
-        /// Playback storage media. Allowed value "NONE", "UNKNOWN", "CD-DA", "HDD", "NETWORK".
+        /// Playback storage media.
         /// </summary>
         public string PlayMedia => _playMedia;
 
