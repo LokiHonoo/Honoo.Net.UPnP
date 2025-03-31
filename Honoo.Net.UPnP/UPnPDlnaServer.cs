@@ -11,7 +11,7 @@ namespace Honoo.Net
     /// <summary>
     /// UPnP DLNA media server. Need setup port open for firewall. Administrator privileges are required.
     /// </summary>
-    public class UPnPDlnaServer : UPnPEventSubscriber
+    public class UPnPDlnaServer : UPnPEventServer
     {
         #region Members
 
@@ -32,8 +32,8 @@ namespace Honoo.Net
         /// Initializes a new instance of the UPnPDlnaServer class. Need setup firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
-        /// <param name="start">Start HttpListener at now.</param>
-        public UPnPDlnaServer(Uri localHost, bool start = true) : base(localHost, start)
+        /// <exception cref="Exception"/>
+        public UPnPDlnaServer(Uri localHost) : base(localHost)
         {
         }
 
@@ -63,6 +63,7 @@ namespace Honoo.Net
         /// <param name="mediaFile">Local file full path to play.</param>
         /// <param name="checkFileExists">Check file exists.</param>
         /// <returns></returns>
+        /// <exception cref="Exception"/>
         public string AddMedia(string mediaFile, bool checkFileExists = true)
         {
             if (string.IsNullOrWhiteSpace(mediaFile))
@@ -84,10 +85,11 @@ namespace Honoo.Net
         }
 
         /// <summary>
-        /// Add a media file and gets transport url.
+        /// Add a media file and gets transport url. Compute the stream's SHA256 hash set to id. You can set unique by <see cref="AddMedia(Stream, string)"/> to skip compute hash.
         /// </summary>
         /// <param name="mediaStream">Media cache to play.</param>
         /// <returns></returns>
+        /// <exception cref="Exception"/>
         public string AddMedia(Stream mediaStream)
         {
             if (mediaStream is null)
@@ -96,6 +98,32 @@ namespace Honoo.Net
             }
             string id = Encoding.ASCII.GetString(_hash.ComputeHash(mediaStream));
             Uri uri = new Uri(base.Host + id);
+            string url = uri.AbsoluteUri;
+            if (!_media.ContainsKey(url))
+            {
+                _media.Add(url, new Tuple<bool, string, Stream>(false, string.Empty, mediaStream));
+            }
+            return url;
+        }
+
+        /// <summary>
+        /// Add a media file and gets transport url.
+        /// </summary>
+        /// <param name="mediaStream">Media cache to play.</param>
+        /// <param name="unique">Used the unique string set to id. e.g. SHA256 hash.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        public string AddMedia(Stream mediaStream, string unique)
+        {
+            if (mediaStream is null)
+            {
+                throw new ArgumentNullException(nameof(mediaStream));
+            }
+            if (string.IsNullOrWhiteSpace(unique))
+            {
+                throw new ArgumentException($"“{nameof(unique)}”cannit be null or white space.", nameof(unique));
+            }
+            Uri uri = new Uri(base.Host + unique);
             string url = uri.AbsoluteUri;
             if (!_media.ContainsKey(url))
             {

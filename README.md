@@ -88,13 +88,17 @@ private static void TestDlna()
     //Console.WriteLine(service.GetCurrentTransportActions(0));
 
     // Need setup firewall. Administrator privileges are required.
-    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"), true);
+    // Maybe need close firewall to test.
+    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"));
     mediaServer.RequestFailed += MediaServer_RequestFailed;
+
+    string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
 
     string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventRaisedCallback);
     string sid = service.SetEventSubscription(callbackUrl, 3600);
 
-    string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
+    mediaServer.Start();
+
     service.SetAVTransportURI(0, mediaUrl, string.Empty);
     service.Play(0, "1");
 

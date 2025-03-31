@@ -10,7 +10,7 @@ namespace Honoo.Net
     /// <summary>
     /// UPnP event subscribing server. Need setup port open for firewall. Administrator privileges are required.
     /// </summary>
-    public class UPnPEventSubscriber : UPnPServer
+    public class UPnPEventServer : UPnPServer
     {
         #region Members
 
@@ -28,11 +28,11 @@ namespace Honoo.Net
         #region Construction
 
         /// <summary>
-        /// Initializes a new instance of the UPnPEventSubscriber class. Need setup port open for firewall. Administrator privileges are required.
+        /// Initializes a new instance of the UPnPEventServer class. Need setup port open for firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
-        /// <param name="start">Start HttpListener at now.</param>
-        public UPnPEventSubscriber(Uri localHost, bool start = true) : base(localHost, start)
+        /// <exception cref="Exception"/>
+        public UPnPEventServer(Uri localHost) : base(localHost)
         {
         }
 

@@ -8,19 +8,6 @@ namespace Test
 {
     internal class Program
     {
-        private static void UPnPEventRaisedCallback(UPnPServer server, UPnPEventMessage[] messages)
-        {
-            foreach (var message in messages)
-            {
-                Console.WriteLine(DateTime.Now + " ====================================================");
-                Console.WriteLine(message.InstanceID);
-                foreach (KeyValuePair<string, string> change in message.Changes)
-                {
-                    Console.WriteLine(change.Key + ":" + change.Value);
-                }
-            }
-        }
-
         private static void Main()
         {
             ConsoleHelper.DisableQuickEditMode();
@@ -80,13 +67,17 @@ namespace Test
             //Console.WriteLine(service.GetCurrentTransportActions(0));
 
             // Need setup port open for firewall. Administrator privileges are required.
-            UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"), true);
+            // Maybe need close firewall to test.
+            UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"));
             mediaServer.RequestFailed += MediaServer_RequestFailed;
+
+            string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
 
             string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventRaisedCallback);
             string sid = service.SetEventSubscription(callbackUrl, 3600);
 
-            string mediaUrl = mediaServer.AddMedia("E:\\Videos\\OP-ED\\[CASO][Girls-High][NCED][DVDRIP][x264_Vorbis][8D8A632B].mkv");
+            mediaServer.Start();
+
             service.SetAVTransportURI(0, mediaUrl, string.Empty);
             service.Play(0, "1");
             //service.Seek(0, "rel_time", "00:33:33");
@@ -123,6 +114,19 @@ namespace Test
             }
             Console.WriteLine(entry.Protocol + " " + entry.ExternalPort + " " + entry.InternalClient + ":" + entry.InternalPort);
             service.DeletePortMapping("TCP", 4788);
+        }
+
+        private static void UPnPEventRaisedCallback(UPnPServer server, UPnPEventMessage[] messages)
+        {
+            foreach (var message in messages)
+            {
+                Console.WriteLine(DateTime.Now + " ====================================================");
+                Console.WriteLine(message.InstanceID);
+                foreach (KeyValuePair<string, string> change in message.Changes)
+                {
+                    Console.WriteLine(change.Key + ":" + change.Value);
+                }
+            }
         }
     }
 }

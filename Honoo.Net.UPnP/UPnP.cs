@@ -100,25 +100,23 @@ namespace Honoo.Net
         public const string URN_UPNP_SERVICE_WAN_PPP_CONNECTION_1 = "urn:schemas-upnp-org:service:WANPPPConnection:1";
 
         /// <summary>
-        /// Create a new instance of the UPnPDlnaServer class. Need setup port open for firewall. Administrator privileges are required.
+        /// Create a new DLNA media server. Need setup port open for firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
-        /// <param name="start">Start HttpListener at now.</param>
         /// <returns></returns>
-        public static UPnPDlnaServer CreateDlnaServer(Uri localHost, bool start = true)
+        public static UPnPDlnaServer CreateDlnaServer(Uri localHost)
         {
-            return new UPnPDlnaServer(localHost, start);
+            return new UPnPDlnaServer(localHost);
         }
 
         /// <summary>
-        /// Create a new instance of the UPnPEventSubscriber class. Need setup port open for firewall. Administrator privileges are required.
+        /// Create a new event subscribing server. Need setup port open for firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
-        /// <param name="start">Start HttpListener at now.</param>
         /// <returns></returns>
-        public static UPnPEventSubscriber CreateventSubscriber(Uri localHost, bool start = true)
+        public static UPnPEventServer CreateEventServer(Uri localHost)
         {
-            return new UPnPEventSubscriber(localHost, start);
+            return new UPnPEventServer(localHost);
         }
 
         /// <summary>

@@ -15,11 +15,14 @@ namespace Honoo.Net
         private HttpListener _listener;
 
         /// <summary>
+        /// Gets the HttpListener host.
+        /// </summary>
+        public string Host => _host;
+
+        /// <summary>
         /// Gets a value that indecates whether HttpListener has been started.
         /// </summary>
         public bool IsListening => _listener.IsListening;
-
-        internal string Host => _host;
 
         #endregion Members
 
@@ -50,8 +53,8 @@ namespace Honoo.Net
         /// Initializes a new instance of the UPnPServer class. Need setup port open for firewall. Administrator privileges are required.
         /// </summary>
         /// <param name="localHost">Create HttpListener by the local host used external address:port. e.g. <see langword="http://192.168.1.100:8080"/>.</param>
-        /// <param name="start">Start HttpListener at now.</param>
-        protected UPnPServer(Uri localHost, bool start)
+        /// <exception cref="Exception"/>
+        protected UPnPServer(Uri localHost)
         {
             if (localHost == null)
             {
@@ -63,11 +66,6 @@ namespace Honoo.Net
                 AuthenticationSchemes = AuthenticationSchemes.Anonymous
             };
             _listener.Prefixes.Add(_host);
-            if (start)
-            {
-                _listener.Start();
-                _listener.BeginGetContext(GottenContext, null);
-            }
         }
 
         /// <summary>
@@ -131,6 +129,7 @@ namespace Honoo.Net
         /// <summary>
         /// Allows this instance to receive incoming requests.
         /// </summary>
+        /// <exception cref="Exception"/>
         public void Start()
         {
             if (!_listener.IsListening)
