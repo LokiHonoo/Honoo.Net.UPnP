@@ -42,12 +42,6 @@ private static void TestPortMapping()
     //IUPnPWANIPConnection1Service service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1);
     var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
 
-    //Console.WriteLine(service.GetNATRSIPStatus());
-    //Console.WriteLine(service.GetExternalIPAddress());
-    //Console.WriteLine(service.GetStatusInfo());
-    //Console.WriteLine(service.GetConnectionTypeInfo());
-    //Console.WriteLine(service.GetGenericPortMappingEntry(1));
-
     UPnPPortMappingEntry entry;
     try
     {
@@ -79,13 +73,6 @@ private static void TestDlna()
 
     //IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
-
-    //Console.WriteLine(service.GetDeviceCapabilities(0));
-    //Console.WriteLine(service.GetTransportSettings(0));
-    //Console.WriteLine(service.GetMediaInfo(0));
-    //Console.WriteLine(service.GetPositionInfo(0));
-    //Console.WriteLine(service.GetTransportInfo(0));
-    //Console.WriteLine(service.GetCurrentTransportActions(0));
 
     // Need setup firewall. Administrator privileges are required.
     // Maybe need close firewall to test.

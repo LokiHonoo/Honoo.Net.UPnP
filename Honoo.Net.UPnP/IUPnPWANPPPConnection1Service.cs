@@ -7,97 +7,48 @@ namespace Honoo.Net
     /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANPPPConnection:1" interface.
     /// <br />USAGE: <see href="https://upnp.org/specs/gw/UPnP-gw-WANPPPConnection-v1-Service.pdf"/>
     /// </summary>
-    public interface IUPnPWANPPPConnection1Service : IUPnPService
+    public interface IUPnPWANPPPConnection1Service : IUPnPWANConnectionService
     {
         /// <summary>
-        /// Add port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to mapping.</param>
-        /// <param name="internalClient">The internal client to mapping.</param>
-        /// <param name="internalPort">The internal port to mapping.</param>
-        /// <param name="enabled">Enabled.</param>
-        /// <param name="description">Port mapping description.</param>
-        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
-        /// <exception cref="Exception"/>
-        void AddPortMapping(string protocol,
-                            ushort externalPort,
-                            IPAddress internalClient,
-                            ushort internalPort,
-                            bool enabled,
-                            string description,
-                            uint leaseDuration);
-
-        /// <summary>
-        /// Delete port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to delete mapping.</param>
-        /// <exception cref="Exception"/>
-        void DeletePortMapping(string protocol, ushort externalPort);
-
-        /// <summary>
-        /// Force termination.
-        /// </summary>
-        /// <exception cref="Exception"/>
-        void ForceTermination();
-
-        /// <summary>
-        /// Get Connection type info. Possible types maybe wrong because I don't know what the separator is. :(
+        /// Gets link layer max bit rates.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPConnectionTypeInfo GetConnectionTypeInfo();
+        UPnPLinkLayerMaxBitRates GetLinkLayerMaxBitRates();
 
         /// <summary>
-        /// Get external IPAddress.
+        /// Gets password.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        string GetExternalIPAddress();
+        string GetPassword();
 
         /// <summary>
-        /// Get generic port mapping entry.
-        /// </summary>
-        /// <param name="index">The index of entry.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        UPnPPortMappingEntry GetGenericPortMappingEntry(uint index);
-
-        /// <summary>
-        /// Get NAT RSIP status.
+        /// Gets PPP authentication protocol.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPNatRsipStatus GetNATRSIPStatus();
+        string GetPPPAuthenticationProtocol();
 
         /// <summary>
-        /// Get specific port mapping entry.
-        /// </summary>
-        /// <param name="protocol">The protocol to query. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to query.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        UPnPPortMappingEntry GetSpecificPortMappingEntry(string protocol, ushort externalPort);
-
-        /// <summary>
-        /// Get status info.
+        /// Gets PPP compression protocol.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPStatusInfo GetStatusInfo();
+        string GetPPPCompressionProtocol();
 
         /// <summary>
-        /// Request connection.
+        /// Gets PPP encryption protocol.
         /// </summary>
+        /// <returns></returns>
         /// <exception cref="Exception"/>
-        void RequestConnection();
+        string GetPPPEncryptionProtocol();
 
         /// <summary>
-        /// Set connection type.
+        /// Gets user name.
         /// </summary>
-        /// <param name="connectionType">The connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".</param>
+        /// <returns></returns>
         /// <exception cref="Exception"/>
-        void SetConnectionType(string connectionType);
+        string GetUserName();
     }
 }

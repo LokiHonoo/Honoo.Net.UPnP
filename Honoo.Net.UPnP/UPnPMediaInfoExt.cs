@@ -27,6 +27,7 @@ namespace Honoo.Net
 
         /// <summary>
         /// Current media category.
+        /// <br />This property accepts the following: "NO_MEDIA","TRACK_AWARE", "TRACK_UNAWARE".
         /// </summary>
         public string CurrentType => _currentType;
 
@@ -61,17 +62,26 @@ namespace Honoo.Net
         public uint NrTracks => _nrTracks;
 
         /// <summary>
-        /// Playback storage medium..
+        /// Playback storage medium.
+        /// <br />This property accepts the following: "UNKNOWN","DV", "MINI-DV", "VHS", "W-VHS", "S-VHS", "D-VHS", "VHSC", "VIDEO8","HI8", "CD-ROM",
+        /// <br />"CD-DA", ">CD-R", "CD-RW", "VIDEO-CD", "SACD","MD-AUDIO", "MD-PICTURE", "DVD-ROM", "DVD-VIDEO", "DVD-R", "DVD+RW","DVD-RW",
+        /// <br />"DVD-RAM", "DVD-AUDIO", "DAT", "LD", "HDD", "MICRO-MV","NETWORK", "NONE", "NOT_IMPLEMENTED", "SD", "PC-CARD", "MMC", "CF",
+        /// <br />"BD", "MS", "HD_DVD", Vendor-defined.
         /// </summary>
         public string PlayMedium => _playMedium;
 
         /// <summary>
         /// Record storage medium.
+        /// <br />This property accepts the following: "UNKNOWN","DV", "MINI-DV", "VHS", "W-VHS", "S-VHS", "D-VHS", "VHSC", "VIDEO8","HI8", "CD-ROM",
+        /// <br />"CD-DA", ">CD-R", "CD-RW", "VIDEO-CD", "SACD","MD-AUDIO", "MD-PICTURE", "DVD-ROM", "DVD-VIDEO", "DVD-R", "DVD+RW","DVD-RW",
+        /// <br />"DVD-RAM", "DVD-AUDIO", "DAT", "LD", "HDD", "MICRO-MV","NETWORK", "NONE", "NOT_IMPLEMENTED", "SD", "PC-CARD", "MMC", "CF",
+        /// <br />"BD", "MS", "HD_DVD", Vendor-defined.
         /// </summary>
         public string RecordMedium => _recordMedium;
 
         /// <summary>
         /// Record medium write status.
+        /// <br />This property accepts the following: "WRITABLE", "PROTECTED", "NOT_WRITABLE", "UNKNOWN", "NOT_IMPLEMENTED", Vendor-defined.
         /// </summary>
         public string WriteStatus => _writeStatus;
 

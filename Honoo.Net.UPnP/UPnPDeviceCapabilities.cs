@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 
 namespace Honoo.Net
@@ -13,22 +12,29 @@ namespace Honoo.Net
 
         private readonly string _playMedia;
         private readonly string _recMedia;
-        private readonly string[] _recQualityModes;
+        private readonly string _recQualityModes;
 
         /// <summary>
         /// Playback storage media.
+        /// <br />This property accepts the following: "UNKNOWN","DV", "MINI-DV", "VHS", "W-VHS", "S-VHS", "D-VHS", "VHSC", "VIDEO8","HI8", "CD-ROM",
+        /// <br />"CD-DA", ">CD-R", "CD-RW", "VIDEO-CD", "SACD","MD-AUDIO", "MD-PICTURE", "DVD-ROM", "DVD-VIDEO", "DVD-R", "DVD+RW","DVD-RW",
+        /// <br />"DVD-RAM", "DVD-AUDIO", "DAT", "LD", "HDD", "MICRO-MV","NETWORK", "NONE", "NOT_IMPLEMENTED", Vendor-defined.
         /// </summary>
         public string PlayMedia => _playMedia;
 
         /// <summary>
         /// Record storage media.
+        /// <br />This property accepts the following: "UNKNOWN","DV", "MINI-DV", "VHS", "W-VHS", "S-VHS", "D-VHS", "VHSC", "VIDEO8","HI8", "CD-ROM",
+        /// <br />"CD-DA", ">CD-R", "CD-RW", "VIDEO-CD", "SACD","MD-AUDIO", "MD-PICTURE", "DVD-ROM", "DVD-VIDEO", "DVD-R", "DVD+RW","DVD-RW",
+        /// <br />"DVD-RAM", "DVD-AUDIO", "DAT", "LD", "HDD", "MICRO-MV","NETWORK", "NONE", "NOT_IMPLEMENTED", Vendor-defined.
         /// </summary>
         public string RecMedia => _recMedia;
 
         /// <summary>
-        /// Record quality modes.
+        /// Record quality modes. Value is CSV string.
+        /// <br />This property accepts the following: "0:EP", "1:LP", "2:SP", "0:BASIC", "1:MEDIUM", "2:HIGH", "NOT_IMPLEMENTED", Vendor-defined.
         /// </summary>
-        public ICollection<string> RecQualityModes => _recQualityModes;
+        public string RecQualityModes => _recQualityModes;
 
         #endregion Members
 
@@ -40,7 +46,7 @@ namespace Honoo.Net
         {
             _playMedia = node.SelectSingleNode("PlayMedia").InnerText.Trim();
             _recMedia = node.SelectSingleNode("RecMedia").InnerText.Trim();
-            _recQualityModes = node.SelectSingleNode("RecQualityModes").InnerText.Trim().Split(',');
+            _recQualityModes = node.SelectSingleNode("RecQualityModes").InnerText.Trim();
         }
 
         /// <summary>
@@ -52,7 +58,7 @@ namespace Honoo.Net
             StringBuilder builder = new StringBuilder();
             builder.AppendLine($"PlayMedia:{_playMedia}");
             builder.AppendLine($"RecMedia:{_recMedia}");
-            builder.AppendLine($"RecQualityModes:{string.Join(",", _recQualityModes)}");
+            builder.AppendLine($"RecQualityModes:{_recQualityModes}");
             return builder.ToString();
         }
     }

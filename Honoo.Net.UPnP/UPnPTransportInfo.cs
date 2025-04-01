@@ -20,13 +20,14 @@ namespace Honoo.Net
         public string CurrentSpeed => _currentSpeed;
 
         /// <summary>
-        /// Current transport state. This property accepts the following:
-        /// "STOPPED", "PAUSED_PLAYBACK", "PLAYING", "TRANSITIONING", "NO_MEDIA_PRESENT".
+        /// Current transport state.
+        /// <br />This property accepts the following: "STOPPED", "PAUSED_PLAYBACK", "PAUSED_RECORDING", "PLAYING", "RECORDING", "TRANSITIONING", "NO_MEDIA_PRESENT", Vendor-defined.
         /// </summary>
         public string CurrentTransportState => _currentTransportState;
 
         /// <summary>
-        /// Current transport status. This property accepts the following: "OK", "ERROR_OCCURRED".
+        /// Current transport status.
+        /// <br />This property accepts the following: "OK", "ERROR_OCCURRED", Vendor-defined.
         /// </summary>
         public string CurrentTransportStatus => _currentTransportStatus;
 

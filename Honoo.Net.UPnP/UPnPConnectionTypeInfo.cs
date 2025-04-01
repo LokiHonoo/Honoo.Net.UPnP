@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 
 namespace Honoo.Net
@@ -12,17 +11,19 @@ namespace Honoo.Net
         #region Members
 
         private readonly string _connectionType;
-        private readonly string[] _possibleConnectionTypes;
+        private readonly string _possibleConnectionTypes;
 
         /// <summary>
-        /// Connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".
+        /// Connection type.
+        /// <br />This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".
         /// </summary>
         public string ConnectionType => _connectionType;
 
         /// <summary>
-        /// Possible connection types. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".
+        /// Possible connection types. Value is CSV string.
+        /// <br />This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".
         /// </summary>
-        public ICollection<string> PossibleConnectionTypes => _possibleConnectionTypes;
+        public string PossibleConnectionTypes => _possibleConnectionTypes;
 
         #endregion Members
 
@@ -33,7 +34,7 @@ namespace Honoo.Net
         internal UPnPConnectionTypeInfo(XmlNode node)
         {
             _connectionType = node.SelectSingleNode("NewConnectionType").InnerText.Trim();
-            _possibleConnectionTypes = node.SelectSingleNode("NewPossibleConnectionTypes").InnerText.Trim().Split(',');
+            _possibleConnectionTypes = node.SelectSingleNode("NewPossibleConnectionTypes").InnerText.Trim();
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace Honoo.Net
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendLine($"NewConnectionType:{_connectionType}");
-            builder.AppendLine($"NewPossibleConnectionTypes:{string.Join(",", _possibleConnectionTypes)}");
+            builder.AppendLine($"NewPossibleConnectionTypes:{_possibleConnectionTypes}");
             return builder.ToString();
         }
     }

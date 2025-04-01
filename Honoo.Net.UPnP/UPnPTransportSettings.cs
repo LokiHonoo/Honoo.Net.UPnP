@@ -14,13 +14,14 @@ namespace Honoo.Net
         private readonly string _recQualityMode;
 
         /// <summary>
-        /// Current play mode. This property accepts the following:
-        /// "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO".
+        /// Current play mode.
+        /// <br />This property accepts the following: "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO", Vendor-defined.
         /// </summary>
         public string PlayMode => _playMode;
 
         /// <summary>
         /// Current record quality mode.
+        /// <br />This property accepts the following: "0:EP", "1:LP", "2:SP", "0:BASIC", "1:MEDIUM", "2:HIGH", "NOT_IMPLEMENTED", Vendor-defined.
         /// </summary>
         public string RecQualityMode => _recQualityMode;
 

@@ -117,6 +117,15 @@ namespace Honoo.Net
         void SetAVTransportURI(uint instanceID, string currentURI, string currentURIMetaData);
 
         /// <summary>
+        /// Set audio/video transport uri. Need DLNA http server. Used by "UPnPDlnaServer" or design by youself.
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <param name="nextURI">Next audio/video transport uri.</param>
+        /// <param name="nextURIMetaData">Next audio/video transport uri meta data.</param>
+        /// <exception cref="Exception"/>
+        void SetNextAVTransportURI(uint instanceID, string nextURI, string nextURIMetaData);
+
+        /// <summary>
         /// Set play mode.
         /// </summary>
         /// <param name="instanceID">Instance ID.</param>
@@ -124,6 +133,15 @@ namespace Honoo.Net
         /// "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO".</param>
         /// <exception cref="Exception"/>
         void SetPlayMode(uint instanceID, string playMode);
+
+        /// <summary>
+        /// Set record quality mode.
+        /// </summary>
+        /// <param name="instanceID">Instance ID.</param>
+        /// <param name="recordQualityMode">Record quality mode. This property accepts the following: "0:EP", "1:LP", "2:SP", "0:BASIC", "1:MEDIUM", "2:HIGH", "NOT_IMPLEMENTED", Vendor-defined.
+        /// </param>
+        /// <exception cref="Exception"/>
+        void SetRecordQualityMode(uint instanceID, string recordQualityMode);
 
         /// <summary>
         /// Stop.

@@ -59,13 +59,6 @@ namespace Test
 
             var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
 
-            //Console.WriteLine(service.GetDeviceCapabilities(0));
-            //Console.WriteLine(service.GetTransportSettings(0));
-            //Console.WriteLine(service.GetMediaInfo(0));
-            //Console.WriteLine(service.GetPositionInfo(0));
-            //Console.WriteLine(service.GetTransportInfo(0));
-            //Console.WriteLine(service.GetCurrentTransportActions(0));
-
             // Need setup port open for firewall. Administrator privileges are required.
             // Maybe need close firewall to test.
             UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"));
@@ -95,12 +88,6 @@ namespace Test
             UPnPRootDevice router = devices[0];
 
             var service = router.FindService(UPnP.URN_UPNP_SERVICE_WAN_IP_CONNECTION_1).Interfaces.WANIPConnection1;
-
-            //Console.WriteLine(service.GetNATRSIPStatus());
-            //Console.WriteLine(service.GetExternalIPAddress());
-            //Console.WriteLine(service.GetStatusInfo());
-            //Console.WriteLine(service.GetConnectionTypeInfo());
-            //Console.WriteLine(service.GetGenericPortMappingEntry(1));
 
             UPnPPortMappingEntry entry;
             try
