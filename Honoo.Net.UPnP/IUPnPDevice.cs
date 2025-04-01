@@ -63,6 +63,11 @@ namespace Honoo.Net
         UPnPDevice ParentDevice { get; }
 
         /// <summary>
+        /// Presentation URL.
+        /// </summary>
+        string PresentationURL { get; }
+
+        /// <summary>
         /// Root device.
         /// </summary>
         UPnPRootDevice RootDevice { get; }

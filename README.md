@@ -69,8 +69,6 @@ private static void TestDlna()
     UPnPRootDevice[] devices = UPnP.Discover(TimeSpan.FromMilliseconds(2000), UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     UPnPRootDevice dlna = devices[0];
 
-    Console.WriteLine(dlna.Device.Interfaces.MediaRenderer1.XDlnaDoc);
-
     //IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
 

@@ -7,7 +7,9 @@
     {
         internal UPnPServiceInterfaces(UPnPService service)
         {
+            this.MainInterface = service;
             this.AVTransport1 = service;
+            this.AVTransport2 = service;
             this.WANIPConnection1 = service;
             this.WANIPConnection2 = service;
             this.WANPPPConnection1 = service;
@@ -17,6 +19,16 @@
         /// Gets AVTransport1 interface.
         /// </summary>
         public IUPnPAVTransport1Service AVTransport1 { get; }
+
+        /// <summary>
+        /// Gets AVTransport1 interface.
+        /// </summary>
+        public IUPnPAVTransport2Service AVTransport2 { get; }
+
+        /// <summary>
+        /// Gets main interface.
+        /// </summary>
+        public IUPnPService MainInterface { get; }
 
         /// <summary>
         /// Gets WANIPConnection1 interface.

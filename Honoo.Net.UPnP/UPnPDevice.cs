@@ -7,7 +7,7 @@ namespace Honoo.Net
     /// <summary>
     /// UPnP device.
     /// </summary>
-    public sealed class UPnPDevice : IUPnPDevice, IUPnPMediaRenderer1Device
+    public sealed class UPnPDevice : IUPnPDevice
     {
         #region Members
 
@@ -23,12 +23,12 @@ namespace Honoo.Net
         private readonly string _modelNumber;
         private readonly string _modelUrl;
         private readonly UPnPDevice _parentDevice;
+        private readonly string _presentationURL;
         private readonly UPnPRootDevice _rootDevice;
         private readonly string _serialNumber;
         private readonly UPnPService[] _services;
         private readonly string _udn;
         private readonly string _upc;
-        private readonly string _xDlnaDoc;
 
         /// <summary>
         /// Child devices.
@@ -91,6 +91,11 @@ namespace Honoo.Net
         public UPnPDevice ParentDevice => _parentDevice;
 
         /// <summary>
+        /// Presentation URL.
+        /// </summary>
+        public string PresentationURL => _presentationURL;
+
+        /// <summary>
         /// Root device.
         /// </summary>
         public UPnPRootDevice RootDevice => _rootDevice;
@@ -115,11 +120,6 @@ namespace Honoo.Net
         /// </summary>
         public string Upc => _upc;
 
-        /// <summary>
-        /// Gets the x dlna doc if this device provides dlna service, else return "null".
-        /// </summary>
-        string IUPnPMediaRenderer1Device.XDlnaDoc => _xDlnaDoc;
-
         #endregion Members
 
         #region Construction
@@ -143,30 +143,40 @@ namespace Honoo.Net
             _modelNumber = deviceNode.SelectSingleNode("default:modelNumber", nm)?.InnerText.Trim();
             _modelUrl = deviceNode.SelectSingleNode("default:modelURL", nm)?.InnerText.Trim();
             _serialNumber = deviceNode.SelectSingleNode("default:serialNumber", nm)?.InnerText.Trim();
-            _udn = deviceNode.SelectSingleNode("default:UDN", nm).InnerText.Trim();
+            _udn = deviceNode.SelectSingleNode("default:UDN", nm)?.InnerText.Trim();
             _upc = deviceNode.SelectSingleNode("default:UPC", nm)?.InnerText.Trim();
+            _presentationURL = deviceNode.SelectSingleNode("default:presentationURL", nm)?.InnerText.Trim();
 
-            _xDlnaDoc = deviceNode.SelectSingleNode("dlna:X_DLNADOC", nm)?.InnerText.Trim();
+            //_xDlnaDoc = deviceNode.SelectSingleNode("dlna:X_DLNADOC", nm)?.InnerText.Trim();
 
             _parentDevice = parentDevice;
             _rootDevice = rootDevice;
             List<UPnPIcon> icons = new List<UPnPIcon>();
             XmlNodeList childIconNodes = deviceNode.SelectNodes("default:iconList/default:icon", nm);
-            foreach (XmlNode childIconNode in childIconNodes)
+            if (childIconNodes != null)
             {
-                icons.Add(new UPnPIcon(childIconNode, nm, this, rootDevice));
+                foreach (XmlNode childIconNode in childIconNodes)
+                {
+                    icons.Add(new UPnPIcon(childIconNode, nm, this, rootDevice));
+                }
             }
             List<UPnPDevice> devices = new List<UPnPDevice>();
             XmlNodeList childDeviceNodes = deviceNode.SelectNodes("default:deviceList/default:device", nm);
-            foreach (XmlNode childDeviceNode in childDeviceNodes)
+            if (childDeviceNodes != null)
             {
-                devices.Add(new UPnPDevice(childDeviceNode, nm, this, rootDevice));
+                foreach (XmlNode childDeviceNode in childDeviceNodes)
+                {
+                    devices.Add(new UPnPDevice(childDeviceNode, nm, this, rootDevice));
+                }
             }
             List<UPnPService> services = new List<UPnPService>();
             XmlNodeList serviceNodes = deviceNode.SelectNodes("default:serviceList/default:service", nm);
-            foreach (XmlNode serviceNode in serviceNodes)
+            if (serviceNodes != null)
             {
-                services.Add(new UPnPService(serviceNode, nm, this, rootDevice));
+                foreach (XmlNode serviceNode in serviceNodes)
+                {
+                    services.Add(new UPnPService(serviceNode, nm, this, rootDevice));
+                }
             }
             _icons = icons.ToArray();
             _devices = devices.ToArray();

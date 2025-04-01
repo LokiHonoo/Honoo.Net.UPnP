@@ -7,12 +7,12 @@
     {
         internal UPnPDeviceInterfaces(UPnPDevice device)
         {
-            this.MediaRenderer1 = device;
+            this.MainInterface = device;
         }
 
         /// <summary>
-        /// Gets MediaRenderer1 interface.
+        /// Gets main interface.
         /// </summary>
-        public IUPnPMediaRenderer1Device MediaRenderer1 { get; }
+        public IUPnPDevice MainInterface { get; }
     }
 }
