@@ -1,4 +1,4 @@
-﻿using System.Xml;
+﻿using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -57,17 +57,17 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPIcon class.
         /// </summary>
-        /// <param name="iconNode">Icon XmlNode.</param>
-        /// <param name="nm">XmlNamespaceManager.</param>
+        /// <param name="iconElement">Icon element.</param>
         /// <param name="parentDevice">The UPnPDevice to which the device belongs.</param>
         /// <param name="rootDevice">The UPnPRootDevice to which the root device belongs.</param>
-        internal UPnPIcon(XmlNode iconNode, XmlNamespaceManager nm, UPnPDevice parentDevice, UPnPRootDevice rootDevice)
+        internal UPnPIcon(XElement iconElement, UPnPDevice parentDevice, UPnPRootDevice rootDevice)
         {
-            _depth = iconNode.SelectSingleNode("default:depth", nm)?.InnerText.Trim();
-            _height = iconNode.SelectSingleNode("default:height", nm)?.InnerText.Trim();
-            _mimetype = iconNode.SelectSingleNode("default:mimetype", nm)?.InnerText.Trim();
-            _url = iconNode.SelectSingleNode("default:url", nm)?.InnerText.Trim();
-            _width = iconNode.SelectSingleNode("default:width", nm)?.InnerText.Trim();
+            XNamespace nm = iconElement.GetDefaultNamespace();
+            _depth = iconElement.Element(nm + "depth")?.Value.Trim();
+            _height = iconElement.Element(nm + "height")?.Value.Trim();
+            _mimetype = iconElement.Element(nm + "mimetype")?.Value.Trim();
+            _url = iconElement.Element(nm + "url")?.Value.Trim();
+            _width = iconElement.Element(nm + "width")?.Value.Trim();
             _parentDevice = parentDevice;
             _rootDevice = rootDevice;
         }

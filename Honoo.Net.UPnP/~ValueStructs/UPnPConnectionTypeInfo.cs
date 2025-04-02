@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -30,11 +30,11 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPConnectionTypeInfo class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPConnectionTypeInfo(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPConnectionTypeInfo(XElement element)
         {
-            _connectionType = node.SelectSingleNode("NewConnectionType").InnerText.Trim();
-            _possibleConnectionTypes = node.SelectSingleNode("NewPossibleConnectionTypes").InnerText.Trim();
+            _connectionType = element.Element("NewConnectionType").Value.Trim();
+            _possibleConnectionTypes = element.Element("NewPossibleConnectionTypes").Value.Trim();
         }
 
         /// <summary>

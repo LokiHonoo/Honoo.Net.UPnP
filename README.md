@@ -14,6 +14,12 @@
 
 Simple UPnP. Provides port mapping, DLNA e.g..
 
+PortMapping v1 - implemented.  
+PortMapping v2 - implemented.  
+DLNA v1 - implemented.  
+DLNA v2 - 90 %.  
+DLNA v3 - 0 %.
+
 ## GUIDE
 
 ### NuGet
@@ -45,17 +51,15 @@ private static void TestPortMapping()
     UPnPPortMappingEntry entry;
     try
     {
-        entry = service.GetSpecificPortMappingEntry("TCP", 4788);
+        entry = service.GetSpecificPortMappingEntry("TCP", string.Empty, 4788);
     }
     catch
     {
-        service.AddPortMapping("TCP", 4788, IPAddress.Parse("192.168.1.11"), 4788, true, "test", 0);
-        entry = service.GetSpecificPortMappingEntry("TCP", 4788);
+        service.AddPortMapping("TCP", string.Empty, 4788, IPAddress.Parse("192.168.1.11"), 4788, true, "test", 0);
+        entry = service.GetSpecificPortMappingEntry("TCP", string.Empty, 4788);
     }
     Console.WriteLine(entry.Protocol + " " + entry.ExternalPort + " " + entry.InternalClient + ":" + entry.InternalPort);
-    service.DeletePortMapping("TCP", 4788);
-
-    Console.ReadKey(true);
+    service.DeletePortMapping("TCP", string.Empty, 4788);
 }
 
 ```
@@ -69,28 +73,33 @@ private static void TestDlna()
     UPnPRootDevice[] devices = UPnP.Discover(TimeSpan.FromMilliseconds(2000), UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
     UPnPRootDevice dlna = devices[0];
 
-    //IUPnPAVTransport1Service service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1);
-    var service = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
+    var serviceAV = dlna.FindService(UPnP.URN_UPNP_SERVICE_AV_TRANSPORT_1).Interfaces.AVTransport1;
+    var serviceRC = dlna.FindService(UPnP.URN_UPNP_SERVICE_RENDERING_CONTROL_1).Interfaces.RenderingControl1;
 
-    // Need setup firewall. Administrator privileges are required.
+    // Need setup port open for firewall. Administrator privileges are required.
     // Maybe need close firewall to test.
-    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"));
+    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"));
     mediaServer.RequestFailed += MediaServer_RequestFailed;
 
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
 
-    string callbackUrl = mediaServer.AddEventSubscriber(UPnPEventRaisedCallback);
-    string sid = service.SetEventSubscription(callbackUrl, 3600);
+    string callbackUrl = mediaServer.AddEventSubscriber(UPnPAVTEventRaisedCallback, null);
+    string sid = serviceAV.SetEventSubscription(callbackUrl, 3600);
 
     mediaServer.Start();
 
-    service.SetAVTransportURI(0, mediaUrl, string.Empty);
-    service.Play(0, "1");
+    serviceAV.SetAVTransportURI(0, mediaUrl, string.Empty);
+
+    serviceAV.Play(0, "1");
+    Thread.Sleep(2000);
+    serviceRC.SetVolume(0, "Master", 50); // Device maybe not supported
+    Thread.Sleep(2000);
+    serviceRC.SetVolume(0, "Master", 14); // Device maybe not supported
 
     Console.ReadKey(true);
-    service.Stop(0);
+    serviceAV.Stop(0);
     //
-    service.RemoveEventSubscription(sid);
+    serviceAV.RemoveEventSubscription(sid);
     mediaServer.RemoveEventSubscriber(callbackUrl);
     mediaServer.Dispose();
 }
@@ -100,15 +109,23 @@ private static void MediaServer_RequestFailed(UPnPServer server, HttpListenerReq
     Console.WriteLine(exception.ToString());
 }
 
-private static void UPnPEventRaisedCallback(UPnPEventMessage[] messages)
+private static void UPnPAVTEventRaisedCallback(UPnPServer server, UPnPEventMessage message, object userState)
 {
-    foreach (var message in messages)
+    var @interface = message.Interfaces.MediaRenderer;
+    foreach (var instance in @interface.Instances.Values)
     {
-        Console.WriteLine(DateTime.Now + " ====================================================");
-        Console.WriteLine(message.InstanceID);
-        foreach (KeyValuePair<string, string> change in message.Changes)
+        Console.WriteLine(DateTime.Now + "     ================================================");
+        Console.WriteLine($"InstanceID {instance.InstanceID}");
+        foreach (KeyValuePair<string, UPnPChangeAttributes> kv in instance.Properties)
         {
-            Console.WriteLine(change.Key + ":" + change.Value);
+            Console.Write(kv.Key + ":");
+            UPnPChangeAttributes atts = kv.Value;
+            // Console.WriteLine(atts["val"]);
+            foreach (var att in atts)
+            {
+                Console.Write($" {att.Key}=\"{att.Value}\"");
+            }
+            Console.WriteLine();
         }
     }
 }

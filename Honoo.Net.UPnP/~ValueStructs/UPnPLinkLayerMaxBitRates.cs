@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -29,12 +29,12 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPLinkLayerMaxBitRates class.
         /// </summary>
-        /// <param name="node">Response node.</param>
+        /// <param name="element">Response element.</param>
 
-        internal UPnPLinkLayerMaxBitRates(XmlNode node)
+        internal UPnPLinkLayerMaxBitRates(XElement element)
         {
-            _upstreamMaxBitRate = uint.Parse(node.SelectSingleNode("NewUpstreamMaxBitRate").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _downstreamMaxBitRate = uint.Parse(node.SelectSingleNode("NewDownstreamMaxBitRate").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _upstreamMaxBitRate = uint.Parse(element.Element("NewUpstreamMaxBitRate").Value.Trim(), CultureInfo.InvariantCulture);
+            _downstreamMaxBitRate = uint.Parse(element.Element("NewDownstreamMaxBitRate").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

@@ -22,10 +22,10 @@ namespace Honoo.Net
         public const string URN_MICROSOFT_SERVICE_OS_INFO_1 = "urn:schemas-microsoft-com:service:OSInfo:1";
 
         /// <summary></summary>
-        public const string URN_MICROSOFT_SERVICE_WAN_IPV6_FIREWALL_CONTROL_1 = "urn:schemas-microsoft-com:service:WANIPv6FirewallControl:1";
+        public const string URN_MULTISCREEN_SERVICE_DIAL_1 = "urn:dial-multiscreen-org:service:dial:1";
 
         /// <summary></summary>
-        public const string URN_MULTISCREEN_SERVICE_DIAL_1 = "urn:dial-multiscreen-org:service:dial:1";
+        public const string URN_RVUALLIANCE_SERVICE_STREAM_SPLICING_1 = "urn:schemas-rvualliance-org:service:StreamSplicing:1";
 
         /// <summary></summary>
         public const string URN_SONY_SERVICE_IRCC_1 = "urn:schemas-sony-com:service:IRCC:1";
@@ -37,6 +37,9 @@ namespace Honoo.Net
         public const string URN_TENCENT_SERVICE_QPLAY_1 = "urn:schemas-tencent-com:service:QPlay:1";
 
         /// <summary></summary>
+        public const string URN_UPNP_DEVICE_BASIC_1 = "urn:schemas-upnp-org:device:Basic:1";
+
+        /// <summary></summary>
         public const string URN_UPNP_DEVICE_INTERNET_GATEWAY_DEVICE_1 = "urn:schemas-upnp-org:device:InternetGatewayDevice:1";
 
         /// <summary></summary>
@@ -44,6 +47,12 @@ namespace Honoo.Net
 
         /// <summary></summary>
         public const string URN_UPNP_DEVICE_MEDIA_RENDERER_1 = "urn:schemas-upnp-org:device:MediaRenderer:1";
+
+        /// <summary></summary>
+        public const string URN_UPNP_DEVICE_MEDIA_RENDERER_2 = "urn:schemas-upnp-org:device:MediaRenderer:2";
+
+        /// <summary></summary>
+        public const string URN_UPNP_DEVICE_MEDIA_RENDERER_3 = "urn:schemas-upnp-org:device:MediaRenderer:3";
 
         /// <summary></summary>
         public const string URN_UPNP_DEVICE_WAN_CONNECTION_DEVICE_1 = "urn:schemas-upnp-org:device:WANConnectionDevice:1";
@@ -55,10 +64,25 @@ namespace Honoo.Net
         public const string URN_UPNP_DEVICE_WAN_DEVICE_1 = "urn:schemas-upnp-org:device:WANDevice:1";
 
         /// <summary></summary>
+        public const string URN_UPNP_DEVICE_WAN_DEVICE_2 = "urn:schemas-upnp-org:device:WANDevice:2";
+
+        /// <summary></summary>
         public const string URN_UPNP_SERVICE_AV_TRANSPORT_1 = "urn:schemas-upnp-org:service:AVTransport:1";
 
         /// <summary></summary>
+        public const string URN_UPNP_SERVICE_AV_TRANSPORT_2 = "urn:schemas-upnp-org:service:AVTransport:2";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_AV_TRANSPORT_3 = "urn:schemas-upnp-org:service:AVTransport:3";
+
+        /// <summary></summary>
         public const string URN_UPNP_SERVICE_CONNECTION_MANAGER_1 = "urn:schemas-upnp-org:service:ConnectionManager:1";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_CONNECTION_MANAGER_2 = "urn:schemas-upnp-org:service:ConnectionManager:2";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_CONNECTION_MANAGER_3 = "urn:schemas-upnp-org:service:ConnectionManager:3";
 
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_DEVICE_PROTECTION_1 = "urn:schemas-upnp-org:service:DeviceProtection:1";
@@ -70,10 +94,19 @@ namespace Honoo.Net
         public const string URN_UPNP_SERVICE_LAYER_3_FORWARDING_1 = "urn:schemas-upnp-org:service:Layer3Forwarding:1";
 
         /// <summary></summary>
+        public const string URN_UPNP_SERVICE_LINKAGE_SERVICE_1 = "urn:schemas-upnp-org:service:LinkageService:1";
+
+        /// <summary></summary>
         public const string URN_UPNP_SERVICE_PRIVATE_SERVER_1 = "urn:schemas-upnp-org:service:PrivateServer:1";
 
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_RENDERING_CONTROL_1 = "urn:schemas-upnp-org:service:RenderingControl:1";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_RENDERING_CONTROL_2 = "urn:schemas-upnp-org:service:RenderingControl:2";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_RENDERING_CONTROL_3 = "urn:schemas-upnp-org:service:RenderingControl:3";
 
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_WAN_CABLE_LINK_CONFIG_1 = "urn:schemas-upnp-org:service:WANCableLinkConfig:1";
@@ -92,6 +125,9 @@ namespace Honoo.Net
 
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_WAN_IP_CONNECTION_2 = "urn:schemas-upnp-org:service:WANIPConnection:2";
+
+        /// <summary></summary>
+        public const string URN_UPNP_SERVICE_WAN_IPV6_FIREWALL_CONTROL_1 = "urn:schemas-upnp-org:service:WANIPv6FirewallControl:1";
 
         /// <summary></summary>
         public const string URN_UPNP_SERVICE_WAN_POTS_LINK_CONFIG_1 = "urn:schemas-upnp-org:service:WANPOTSLinkConfig:1";

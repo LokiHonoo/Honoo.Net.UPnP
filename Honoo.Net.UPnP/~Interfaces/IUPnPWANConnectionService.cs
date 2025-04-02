@@ -12,6 +12,8 @@ namespace Honoo.Net
         /// Add port mapping.
         /// </summary>
         /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="remoteHost">This argument refers to the remote host which sends packets to the IGD.If a wildcard is defined then packets MAY be sent by any host,
+        /// <br />but if a specific IP address is defined, then only packets sent by this IP address are forwarded. Can set to <see cref="string.Empty"/>.</param>
         /// <param name="externalPort">The external port to mapping.</param>
         /// <param name="internalClient">The internal client to mapping.</param>
         /// <param name="internalPort">The internal port to mapping.</param>
@@ -20,6 +22,7 @@ namespace Honoo.Net
         /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
         /// <exception cref="Exception"/>
         void AddPortMapping(string protocol,
+                            string remoteHost,
                             ushort externalPort,
                             IPAddress internalClient,
                             ushort internalPort,
@@ -31,9 +34,11 @@ namespace Honoo.Net
         /// Delete port mapping.
         /// </summary>
         /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="remoteHost">This argument refers to the remote host which sends packets to the IGD.If a wildcard is defined then packets MAY be sent by any host,
+        /// <br />but if a specific IP address is defined, then only packets sent by this IP address are forwarded. Can set to <see cref="string.Empty"/>.</param>
         /// <param name="externalPort">The external port to delete mapping.</param>
         /// <exception cref="Exception"/>
-        void DeletePortMapping(string protocol, ushort externalPort);
+        void DeletePortMapping(string protocol, string remoteHost, ushort externalPort);
 
         /// <summary>
         /// Force termination.
@@ -88,10 +93,12 @@ namespace Honoo.Net
         /// Get specific port mapping entry.
         /// </summary>
         /// <param name="protocol">The protocol to query. This property accepts the following: "TCP", "UDP".</param>
+        /// <param name="remoteHost">This argument refers to the remote host which sends packets to the IGD.If a wildcard is defined then packets MAY be sent by any host,
+        /// <br />but if a specific IP address is defined, then only packets sent by this IP address are forwarded. Can set to <see cref="string.Empty"/>.</param>
         /// <param name="externalPort">The external port to query.</param>
         /// <returns></returns>
         /// <exception cref="Exception"/>
-        UPnPPortMappingEntry GetSpecificPortMappingEntry(string protocol, ushort externalPort);
+        UPnPPortMappingEntry GetSpecificPortMappingEntry(string protocol, string remoteHost, ushort externalPort);
 
         /// <summary>
         /// Get status info.

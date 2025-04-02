@@ -3,7 +3,7 @@
 namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP IGDv1 "urn:schemas-upnp-org:service:AVTransport:1" interface.
+    /// UPnP IGD "urn:schemas-upnp-org:service:AVTransport:1" interface.
     /// <br />USAGE: <see href="https://upnp.org/specs/av/UPnP-av-AVTransport-v1-Service.pdf"/>
     /// </summary>
     public interface IUPnPAVTransport1Service : IUPnPService

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -14,7 +14,7 @@ namespace Honoo.Net
     {
         #region Members
 
-        private readonly Dictionary<string, UPnPEventRaisedCallback> _eventSubscribers = new Dictionary<string, UPnPEventRaisedCallback>();
+        private readonly Dictionary<string, Tuple<UPnPEventRaisedCallback, object>> _eventSubscribers = new Dictionary<string, Tuple<UPnPEventRaisedCallback, object>>();
         private int _counter;
         private bool _disposed;
 
@@ -59,12 +59,13 @@ namespace Honoo.Net
         /// Add a event subscriber and gets event subscriber url.
         /// </summary>
         /// <param name="callback">UPnP event updated callback.</param>
+        /// <param name="userState">Pass user state.</param>
         /// <returns></returns>
-        public string AddEventSubscriber(UPnPEventRaisedCallback callback)
+        public string AddEventSubscriber(UPnPEventRaisedCallback callback, object userState)
         {
             Uri uri = new Uri(base.Host + "subscriber" + _counter);
             string url = uri.AbsoluteUri;
-            _eventSubscribers.Add(url, callback);
+            _eventSubscribers.Add(url, new Tuple<UPnPEventRaisedCallback, object>(callback, userState));
             _counter++;
             return url;
         }
@@ -100,36 +101,30 @@ namespace Honoo.Net
                 exception = new ArgumentNullException(nameof(context));
                 handled = true;
             }
-            else if (_eventSubscribers.TryGetValue(url, out UPnPEventRaisedCallback callback))
+            else if (_eventSubscribers.TryGetValue(url, out Tuple<UPnPEventRaisedCallback, object> callback))
             {
                 try
                 {
                     byte[] buffer = new byte[context.Request.ContentLength64];
                     _ = context.Request.InputStream.Read(buffer, 0, buffer.Length);
                     string response = Encoding.UTF8.GetString(buffer);
-                    XmlDocument doc = new XmlDocument() { XmlResolver = null };
-                    doc.LoadXml(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
-                    //StringReader sreader = new StringReader(response.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">"));
-                    //using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings() { XmlResolver = null }))
-                    //{
-                    //    doc.Load(reader);
-                    //}
-                    XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-                    ns.AddNamespace("e", "urn:schemas-upnp-org:event-1-0");
-                    ns.AddNamespace("avt", "urn:schemas-upnp-org:metadata-1-0/AVT/");
-                    XmlNodeList instances = doc.SelectNodes("/propertyset/property/LastChange/avt:Event/avt:InstanceID", ns);
-                    List<UPnPEventMessage> messages = new List<UPnPEventMessage>();
-                    foreach (XmlNode instance in instances)
+                    XDocument doc = XDocument.Parse(response);
+                    string lastChangeString = doc.Root.Element("property").Element("LastChange").Value;
+                    lastChangeString = lastChangeString.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">");
+                    UPnPEventMessage message;
+                    if (lastChangeString.Contains("urn:schemas-upnp-org:metadata-1-0/AVT/"))
                     {
-                        uint instanceID = uint.Parse(instance.Attributes["val"].InnerText, CultureInfo.InvariantCulture);
-                        Dictionary<string, string> changes = new Dictionary<string, string>();
-                        foreach (XmlNode node in instance.ChildNodes)
-                        {
-                            changes.Add(node.LocalName, node.Attributes["val"].InnerText);
-                        }
-                        messages.Add(new UPnPEventMessage(instanceID, changes));
+                        message = HandleMediaRenderer(url, lastChangeString);
                     }
-                    callback?.Invoke(this, messages.ToArray());
+                    else if (lastChangeString.Contains("urn:schemas-upnp-org:metadata-1-0/RCS/"))
+                    {
+                        message = HandleMediaRenderer(url, lastChangeString);
+                    }
+                    else
+                    {
+                        message = new UPnPUnknownEventMessage(url, lastChangeString);
+                    }
+                    callback?.Item1?.Invoke(this, message, callback.Item2);
                     exception = null;
                 }
                 catch (Exception ex)
@@ -143,6 +138,28 @@ namespace Honoo.Net
                 exception = null;
                 handled = false;
             }
+        }
+
+        private static UPnPMediaRendererEventMessage HandleMediaRenderer(string url, string lastChangeString)
+        {
+            var message = new UPnPMediaRendererEventMessage(url, lastChangeString);
+            XElement root = XElement.Parse(lastChangeString);
+            foreach (XElement instanceElement in root.Elements())
+            {
+                uint instanceID = uint.Parse(instanceElement.Attribute("val").Value, CultureInfo.InvariantCulture);
+                var instance = new UPnPChangeInstance(instanceID);
+                foreach (XElement propertyElement in instanceElement.Elements())
+                {
+                    var property = new UPnPChangeProperty(propertyElement.Name.LocalName);
+                    foreach (XAttribute att in propertyElement.Attributes())
+                    {
+                        property.Attributes.Add(att.Name.LocalName, att.Value);
+                    }
+                    instance.Properties.Add(property.PropertyName, property);
+                }
+                message.Instances.Add(instanceID, instance);
+            }
+            return message;
         }
     }
 }

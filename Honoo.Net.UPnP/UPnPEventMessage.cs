@@ -1,38 +1,39 @@
-﻿using System.Collections.Generic;
-
-namespace Honoo.Net
+﻿namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP event subscription response message.
+    /// UPnP event LastChange message.
     /// </summary>
-    public sealed class UPnPEventMessage
+    public abstract class UPnPEventMessage : IUPnPEventMessage
     {
         #region Members
 
-        private readonly IDictionary<string, string> _changes;
-        private readonly uint _instanceID;
+        private readonly string _eventSubscriptionUrl;
+        private readonly string _eventXmlString;
+        private readonly UPnPEventMessageInterfaces _interfaces;
+
+        /// <inheritdoc/>
+        public string EventSubscriptionUrl => _eventSubscriptionUrl;
+
+        /// <inheritdoc/>
+        public string EventXmlString => _eventXmlString;
 
         /// <summary>
-        /// Changes.
+        /// UPnP event LastChange message interfaces.
         /// </summary>
-        public IDictionary<string, string> Changes => _changes;
-
-        /// <summary>
-        /// Instance ID.
-        /// </summary>
-        public uint InstanceID => _instanceID;
+        public UPnPEventMessageInterfaces Interfaces => _interfaces;
 
         #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPEventMessage class.
         /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="changes">Changes.</param>
-        internal UPnPEventMessage(uint instanceID, IDictionary<string, string> changes)
+        /// <param name="eventSubscriptionUrl">Event subscription url.</param>
+        /// <param name="eventXmlString">Event LastChange xml string.</param>
+        protected UPnPEventMessage(string eventSubscriptionUrl, string eventXmlString)
         {
-            _instanceID = instanceID;
-            _changes = changes;
+            _eventSubscriptionUrl = eventSubscriptionUrl;
+            _eventXmlString = eventXmlString;
+            _interfaces = new UPnPEventMessageInterfaces(this);
         }
     }
 }

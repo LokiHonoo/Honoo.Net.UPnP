@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -41,12 +41,12 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPDeviceCapabilities class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPDeviceCapabilities(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPDeviceCapabilities(XElement element)
         {
-            _playMedia = node.SelectSingleNode("PlayMedia").InnerText.Trim();
-            _recMedia = node.SelectSingleNode("RecMedia").InnerText.Trim();
-            _recQualityModes = node.SelectSingleNode("RecQualityModes").InnerText.Trim();
+            _playMedia = element.Element("PlayMedia").Value.Trim();
+            _recMedia = element.Element("RecMedia").Value.Trim();
+            _recQualityModes = element.Element("RecQualityModes").Value.Trim();
         }
 
         /// <summary>

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Net;
 
 namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP IGDv1 "urn:schemas-upnp-org:service:WANPPPConnection:1" interface.
+    /// UPnP IGD "urn:schemas-upnp-org:service:WANPPPConnection:1" interface.
     /// <br />USAGE: <see href="https://upnp.org/specs/gw/UPnP-gw-WANPPPConnection-v1-Service.pdf"/>
     /// </summary>
     public interface IUPnPWANPPPConnection1Service : IUPnPWANConnectionService

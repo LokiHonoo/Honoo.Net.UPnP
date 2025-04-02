@@ -74,7 +74,7 @@ namespace Honoo.Net
             {
                 throw new IOException("File not exists.");
             }
-            string id = Encoding.ASCII.GetString(_hash.ComputeHash(Encoding.UTF8.GetBytes(mediaFile)));
+            string id = BitConverter.ToString(_hash.ComputeHash(Encoding.UTF8.GetBytes(mediaFile))).Replace("-", "");
             Uri uri = new Uri(base.Host + id);
             string url = uri.AbsoluteUri;
             if (!_media.ContainsKey(url))
@@ -96,7 +96,7 @@ namespace Honoo.Net
             {
                 throw new ArgumentNullException(nameof(mediaStream));
             }
-            string id = Encoding.ASCII.GetString(_hash.ComputeHash(mediaStream));
+            string id = BitConverter.ToString(_hash.ComputeHash(mediaStream)).Replace("-", "");
             Uri uri = new Uri(base.Host + id);
             string url = uri.AbsoluteUri;
             if (!_media.ContainsKey(url))

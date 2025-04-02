@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -36,12 +36,12 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPTransportInfo class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPTransportInfo(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPTransportInfo(XElement element)
         {
-            _currentTransportState = node.SelectSingleNode("CurrentTransportState").InnerText.Trim();
-            _currentTransportStatus = node.SelectSingleNode("CurrentTransportStatus").InnerText.Trim();
-            _currentSpeed = node.SelectSingleNode("CurrentSpeed").InnerText.Trim();
+            _currentTransportState = element.Element("CurrentTransportState").Value.Trim();
+            _currentTransportStatus = element.Element("CurrentTransportStatus").Value.Trim();
+            _currentSpeed = element.Element("CurrentSpeed").Value.Trim();
         }
 
         /// <summary>

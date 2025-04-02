@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Honoo.Net
 {
     /// <summary>
-    /// UPnP IGDv1 "urn:schemas-upnp-org:service:AVTransport:2" interface.
+    /// UPnP IGD "urn:schemas-upnp-org:service:AVTransport:2" interface.
     /// <br />USAGE: <see href="https://upnp.org/specs/av/UPnP-av-AVTransport-v2-Service.pdf"/>
     /// </summary>
     public interface IUPnPAVTransport2Service : IUPnPAVTransport1Service

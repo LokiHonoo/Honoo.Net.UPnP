@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -30,11 +30,11 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPTransportSettings class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPTransportSettings(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPTransportSettings(XElement element)
         {
-            _playMode = node.SelectSingleNode("PlayMode").InnerText.Trim();
-            _recQualityMode = node.SelectSingleNode("RecQualityMode").InnerText.Trim();
+            _playMode = element.Element("PlayMode").Value.Trim();
+            _recQualityMode = element.Element("RecQualityMode").Value.Trim();
         }
 
         /// <summary>

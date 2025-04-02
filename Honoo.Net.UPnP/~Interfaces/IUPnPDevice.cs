@@ -25,7 +25,7 @@ namespace Honoo.Net
         /// <summary>
         /// Icons.
         /// </summary>
-        ICollection<UPnPIcon> Icons { get; }
+        ICollection<UPnPIcon> IconList { get; }
 
         /// <summary>
         /// Manufacturer.
@@ -65,7 +65,7 @@ namespace Honoo.Net
         /// <summary>
         /// Presentation URL.
         /// </summary>
-        string PresentationURL { get; }
+        string PresentationUrl { get; }
 
         /// <summary>
         /// Root device.
@@ -83,13 +83,13 @@ namespace Honoo.Net
         ICollection<UPnPService> Services { get; }
 
         /// <summary>
-        /// Unique device name.
+        /// Unique device name. Device's uuid.
         /// </summary>
-        string Udn { get; }
+        string UDN { get; }
 
         /// <summary>
         /// Universal product code.
         /// </summary>
-        string Upc { get; }
+        string UPC { get; }
     }
 }

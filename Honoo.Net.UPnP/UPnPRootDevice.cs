@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -13,18 +13,13 @@ namespace Honoo.Net
     {
         #region Members
 
-        private readonly Uri _baseUri;
         private readonly WebClient _client;
         private readonly string _descriptionUrl;
         private readonly UPnPDevice _device;
-        private readonly Dictionary<string, string> _headerExtensions = new Dictionary<string, string>();
+        private readonly WebHeaderCollection _headers = new WebHeaderCollection();
         private readonly Version _specVersion;
+        private readonly Uri _uriBase;
         private bool _disposed;
-
-        /// <summary>
-        /// Base uri.
-        /// </summary>
-        public Uri BaseUri => _baseUri;
 
         /// <summary>
         /// Description url.
@@ -37,20 +32,25 @@ namespace Honoo.Net
         public UPnPDevice Device => _device;
 
         /// <summary>
-        /// Append custom header if this device doesn't work. Basic for
+        /// Client headers. Basic for
         /// <br/>"Cache-Control: no-store"
         /// <br/>"Pragma: no-cache"
         /// <br/>"Content-Type: text/xml; charset=utf-8"
         /// <br/>"User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
         /// <br/>
-        /// <br/>Append MAN HTTP Header If throw 405 WebException. <see cref="HeaderExtensions"/>.Add("MAN", "\"http://schemas.xmlsoap.org/soap/envelope/\"; ns=01"
+        /// <br/>Append MAN HTTP Header If throw 405 WebException. <see cref="Headers"/>.Add("MAN: \"http://schemas.xmlsoap.org/soap/envelope/\"; ns=01").
         /// </summary>
-        public IDictionary<string, string> HeaderExtensions => _headerExtensions;
+        public WebHeaderCollection Headers => _headers;
 
         /// <summary>
         /// Specification version.
         /// </summary>
         public Version SpecVersion => _specVersion;
+
+        /// <summary>
+        /// Url base.
+        /// </summary>
+        public Uri UriBase => _uriBase;
 
         internal WebClient Client => _client;
 
@@ -66,34 +66,37 @@ namespace Honoo.Net
         {
             _descriptionUrl = descriptionUrl;
             Uri descriptionUri = new Uri(descriptionUrl);
-            _baseUri = new Uri(descriptionUri.GetLeftPart(UriPartial.Authority));
+            _uriBase = new Uri(descriptionUri.GetLeftPart(UriPartial.Authority));
+            _headers.Add("Cache-Control: no-store");
+            _headers.Add("Pragma: no-cache");
+            _headers.Add("Content-Type: text/xml; charset=utf-8");
+            _headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
             _client = new WebClient
             {
-                BaseAddress = _baseUri.AbsoluteUri,
+                BaseAddress = _uriBase.AbsoluteUri,
                 Encoding = Encoding.UTF8
             };
-            _client.Headers.Add("Cache-Control: no-store");
-            _client.Headers.Add("Pragma: no-cache");
-            _client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
-            if (_headerExtensions.Count > 0)
-            {
-                foreach (var header in _headerExtensions)
-                {
-                    _client.Headers.Add(header.Key, header.Value);
-                }
-            }
-            string description = _client.DownloadString(descriptionUri);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(description);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("default", "urn:schemas-upnp-org:device-1-0");
-            ns.AddNamespace("dlna", "urn:schemas-dlna-org:device-1-0");
-            string major = doc.SelectSingleNode("/default:root/default:specVersion/default:major", ns).InnerText.Trim();
-            string minor = doc.SelectSingleNode("/default:root/default:specVersion/default:minor", ns).InnerText.Trim();
+            _client.Headers.Add(_headers);
+            string response = _client.DownloadString(descriptionUri);
+            XDocument doc = XDocument.Parse(response);
+            XNamespace nm = doc.Root.GetDefaultNamespace();
+            XElement specVersion = doc.Root.Element(nm + "specVersion");
+            string major = specVersion.Element(nm + "major").Value.Trim();
+            string minor = specVersion.Element(nm + "minor").Value.Trim();
             _specVersion = Version.Parse(major + "." + minor);
-            XmlNode deviceNode = doc.SelectSingleNode("/default:root/default:device", ns);
-            _device = new UPnPDevice(deviceNode, ns, null, this);
+            XElement device = doc.Root.Element(nm + "device");
+            _device = new UPnPDevice(device, null, this);
+
+            //XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            //doc.LoadXml(description);
+            //XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            //ns.AddNamespace("default", "urn:schemas-upnp-org:device-1-0");
+            //ns.AddNamespace("dlna", "urn:schemas-dlna-org:device-1-0");
+            //string major = doc.SelectSingleNode("/default:root/default:specVersion/default:major", ns).InnerText.Trim();
+            //string minor = doc.SelectSingleNode("/default:root/default:specVersion/default:minor", ns).InnerText.Trim();
+            //_specVersion = Version.Parse(major + "." + minor);
+            //XmlNode deviceNode = doc.SelectSingleNode("/default:root/default:device", ns);
+            //_device = new UPnPDevice(deviceNode, ns, null, this);
         }
 
         /// <summary>
@@ -134,8 +137,7 @@ namespace Honoo.Net
         /// <summary>
         /// Find the specified type of device if this device contains, else return "null".
         /// </summary>
-        /// <param name="deviceType">Device type. Can used URN string as "urn:schemas-upnp-org:device:WANConnectionDevice:1".
-        ///</param>
+        /// <param name="deviceType">Device type. Can used URN string as "urn:schemas-upnp-org:device:WANConnectionDevice:1".</param>
         /// <returns></returns>
         public UPnPDevice FindDevice(string deviceType)
         {
@@ -143,14 +145,37 @@ namespace Honoo.Net
         }
 
         /// <summary>
+        /// Find the specified type of device if this device contains,
+        /// </summary>
+        /// <param name="deviceType">Device type. Can used URN string as "urn:schemas-upnp-org:device:WANConnectionDevice:1".</param>
+        /// <returns></returns>
+        public UPnPDevice[] FindDevices(string deviceType)
+        {
+            var devices = new List<UPnPDevice>();
+            _device.FindDevices(deviceType, devices);
+            return devices.ToArray();
+        }
+
+        /// <summary>
         /// Find the specified type of service if this device provides, else return "null".
         /// </summary>
-        /// <param name="serviceType">Service type. Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".
-        ///</param>
+        /// <param name="serviceType">Service type. Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".</param>
         /// <returns></returns>
         public UPnPService FindService(string serviceType)
         {
             return _device.FindService(serviceType);
+        }
+
+        /// <summary>
+        /// Find the specified type of service if this device provides,
+        /// </summary>
+        /// <param name="serviceType">Service type. Can used URN string as "urn:schemas-upnp-org:service:WANIPConnection:1".</param>
+        /// <returns></returns>
+        public UPnPService[] FindServices(string serviceType)
+        {
+            var services = new List<UPnPService>();
+            _device.FindServices(serviceType, services);
+            return services.ToArray();
         }
     }
 }

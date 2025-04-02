@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -90,19 +90,19 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPMediaInfoExt class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPMediaInfoExt(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPMediaInfoExt(XElement element)
         {
-            _currentType = node.SelectSingleNode("CurrentType").InnerText.Trim();
-            _nrTracks = uint.Parse(node.SelectSingleNode("NrTracks").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _mediaDuration = node.SelectSingleNode("MediaDuration").InnerText.Trim();
-            _currentURI = node.SelectSingleNode("CurrentURI").InnerText.Trim();
-            _currentURIMetaData = node.SelectSingleNode("CurrentURIMetaData").InnerText.Trim();
-            _nextURI = node.SelectSingleNode("NextURI").InnerText.Trim();
-            _nextURIMetaData = node.SelectSingleNode("NextURIMetaData").InnerText.Trim();
-            _playMedium = node.SelectSingleNode("PlayMedium").InnerText.Trim();
-            _recordMedium = node.SelectSingleNode("RecordMedium").InnerText.Trim();
-            _writeStatus = node.SelectSingleNode("WriteStatus").InnerText.Trim();
+            _currentType = element.Element("CurrentType").Value.Trim();
+            _nrTracks = uint.Parse(element.Element("NrTracks").Value.Trim(), CultureInfo.InvariantCulture);
+            _mediaDuration = element.Element("MediaDuration").Value.Trim();
+            _currentURI = element.Element("CurrentURI").Value.Trim();
+            _currentURIMetaData = element.Element("CurrentURIMetaData").Value.Trim();
+            _nextURI = element.Element("NextURI").Value.Trim();
+            _nextURIMetaData = element.Element("NextURIMetaData").Value.Trim();
+            _playMedium = element.Element("PlayMedium").Value.Trim();
+            _recordMedium = element.Element("RecordMedium").Value.Trim();
+            _writeStatus = element.Element("WriteStatus").Value.Trim();
         }
 
         /// <summary>

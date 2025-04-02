@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -64,38 +64,38 @@ namespace Honoo.Net
         #endregion Members
 
         /// <summary>
-        /// Initializes a new instance of the PortMappingEntry class.
+        /// Initializes a new instance of the UPnPPortMappingEntry class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPPortMappingEntry(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPPortMappingEntry(XElement element)
         {
-            _protocol = node.SelectSingleNode("NewProtocol").InnerText.Trim();
-            _remoteHost = node.SelectSingleNode("NewRemoteHost").InnerText.Trim();
-            _externalPort = ushort.Parse(node.SelectSingleNode("NewExternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _internalClient = node.SelectSingleNode("NewInternalClient").InnerText.Trim();
-            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
-            _description = node.SelectSingleNode("NewPortMappingDescription").InnerText.Trim();
-            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _protocol = element.Element("NewProtocol").Value.Trim();
+            _remoteHost = element.Element("NewRemoteHost").Value.Trim();
+            _externalPort = ushort.Parse(element.Element("NewExternalPort").Value.Trim(), CultureInfo.InvariantCulture);
+            _internalClient = element.Element("NewInternalClient").Value.Trim();
+            _internalPort = ushort.Parse(element.Element("NewInternalPort").Value.Trim(), CultureInfo.InvariantCulture);
+            _enabled = Convert.ToBoolean(int.Parse(element.Element("NewEnabled").Value.Trim(), CultureInfo.InvariantCulture));
+            _description = element.Element("NewPortMappingDescription").Value.Trim();
+            _leaseDuration = uint.Parse(element.Element("NewLeaseDuration").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Initializes a new instance of the PortMappingEntry class.
+        /// Initializes a new instance of the UPnPPortMappingEntry class.
         /// </summary>
         /// <param name="protocol">Protocol.</param>
         /// <param name="remoteHost">Remote host.</param>
         /// <param name="externalPort">External port.</param>
-        /// <param name="node">Response node.</param>
-        internal UPnPPortMappingEntry(string protocol, string remoteHost, ushort externalPort, XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPPortMappingEntry(string protocol, string remoteHost, ushort externalPort, XElement element)
         {
             _protocol = protocol;
             _remoteHost = remoteHost;
             _externalPort = externalPort;
-            _internalClient = node.SelectSingleNode("NewInternalClient").InnerText.Trim();
-            _internalPort = ushort.Parse(node.SelectSingleNode("NewInternalPort").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _enabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
-            _description = node.SelectSingleNode("NewPortMappingDescription").InnerText.Trim();
-            _leaseDuration = uint.Parse(node.SelectSingleNode("NewLeaseDuration").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _internalClient = element.Element("NewInternalClient").Value.Trim();
+            _internalPort = ushort.Parse(element.Element("NewInternalPort").Value.Trim(), CultureInfo.InvariantCulture);
+            _enabled = Convert.ToBoolean(int.Parse(element.Element("NewEnabled").Value.Trim(), CultureInfo.InvariantCulture));
+            _description = element.Element("NewPortMappingDescription").Value.Trim();
+            _leaseDuration = uint.Parse(element.Element("NewLeaseDuration").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

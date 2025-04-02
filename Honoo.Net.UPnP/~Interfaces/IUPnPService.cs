@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -34,14 +35,23 @@ namespace Honoo.Net
         string ScpdUrl { get; }
 
         /// <summary>
-        /// Service ID.
+        /// Service Id.
         /// </summary>
-        string ServiceID { get; }
+        string ServiceId { get; }
 
         /// <summary>
         /// Service type.
         /// </summary>
         string ServiceType { get; }
+
+        /// <summary>
+        /// Decode <see cref="PostAction"/>'s response.
+        /// </summary>
+        /// <param name="response">Post action, and gets response xml string.</param>
+        /// <param name="action">Action name.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"/>
+        XElement DecodeResponse(string response, string action);
 
         /// <summary>
         /// Gets SCPD information form SCPD url.

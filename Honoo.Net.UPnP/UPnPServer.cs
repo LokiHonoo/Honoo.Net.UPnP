@@ -162,19 +162,26 @@ namespace Honoo.Net
 
         private void GottenContext(IAsyncResult ar)
         {
-            HttpListenerContext context = _listener.EndGetContext(ar);
-            _listener.BeginGetContext(GottenContext, null);
-            string url = context.Request.Url.AbsoluteUri;
-            HandleContext(context, url, out Exception exception, out bool handled);
-            context.Response.Close();
-            if (!handled)
+            try
             {
-                exception = new HttpListenerException(404, $"Unknown request url - \"{url}\"");
-                OnRequestFailed(this, context.Request, exception);
+                HttpListenerContext context = _listener.EndGetContext(ar);
+                _listener.BeginGetContext(GottenContext, null);
+                string url = context.Request.Url.AbsoluteUri;
+                HandleContext(context, url, out Exception exception, out bool handled);
+                context.Response.Close();
+                if (!handled)
+                {
+                    exception = new HttpListenerException(404, $"Unknown request url - \"{url}\"");
+                    OnRequestFailed(this, context.Request, exception);
+                }
+                else if (exception != null)
+                {
+                    OnRequestFailed(this, context.Request, exception);
+                }
             }
-            else if (exception != null)
+            catch (Exception ex)
             {
-                OnRequestFailed(this, context.Request, exception);
+                OnRequestFailed(this, null, ex);
             }
         }
     }

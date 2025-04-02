@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -16,7 +16,12 @@ namespace Honoo.Net
         IUPnPWANIPConnection2Service,
         IUPnPWANPPPConnection1Service,
         IUPnPAVTransport1Service,
-        IUPnPAVTransport2Service
+        IUPnPAVTransport2Service,
+        IUPnPConnectionManager1Service,
+        IUPnPConnectionManager2Service,
+        IUPnPRenderingControl1Service,
+        IUPnPRenderingControl2Service
+
     {
         #region Members
 
@@ -26,17 +31,13 @@ namespace Honoo.Net
         private readonly UPnPDevice _parentDevice;
         private readonly UPnPRootDevice _rootDevice;
         private readonly string _scpdUrl;
-        private readonly string _serviceID;
+        private readonly string _serviceId;
         private readonly string _serviceType;
 
-        /// <summary>
-        /// Control url.
-        /// </summary>
+        /// <inheritdoc/>
         public string ControlUrl => _controlUrl;
 
-        /// <summary>
-        /// Event sub url.
-        /// </summary>
+        /// <inheritdoc/>
         public string EventSubUrl => _eventSubUrl;
 
         /// <summary>
@@ -44,29 +45,19 @@ namespace Honoo.Net
         /// </summary>
         public UPnPServiceInterfaces Interfaces => _interfaces;
 
-        /// <summary>
-        /// Parent device.
-        /// </summary>
+        /// <inheritdoc/>
         public UPnPDevice ParentDevice => _parentDevice;
 
-        /// <summary>
-        /// Root device.
-        /// </summary>
+        /// <inheritdoc/>
         public UPnPRootDevice RootDevice => _rootDevice;
 
-        /// <summary>
-        /// Scpd url.
-        /// </summary>
+        /// <inheritdoc/>
         public string ScpdUrl => _scpdUrl;
 
-        /// <summary>
-        /// Service ID.
-        /// </summary>
-        public string ServiceID => _serviceID;
+        /// <inheritdoc/>
+        public string ServiceId => _serviceId;
 
-        /// <summary>
-        /// Service type.
-        /// </summary>
+        /// <inheritdoc/>
         public string ServiceType => _serviceType;
 
         #endregion Members
@@ -76,18 +67,18 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPService class.
         /// </summary>
-        /// <param name="serviceNode">Service XmlNode.</param>
-        /// <param name="nm">XmlNamespaceManager.</param>
+        /// <param name="serviceElement">Service element.</param>
         /// <param name="parentDevice">The UPnPDevice to which the device belongs.</param>
         /// <param name="rootDevice">The UPnPRootDevice to which the root device belongs.</param>
         /// <exception cref="Exception"/>
-        internal UPnPService(XmlNode serviceNode, XmlNamespaceManager nm, UPnPDevice parentDevice, UPnPRootDevice rootDevice)
+        internal UPnPService(XElement serviceElement, UPnPDevice parentDevice, UPnPRootDevice rootDevice)
         {
-            _controlUrl = serviceNode.SelectSingleNode("default:controlURL", nm).InnerText.Trim();
-            _eventSubUrl = serviceNode.SelectSingleNode("default:eventSubURL", nm).InnerText.Trim();
-            _scpdUrl = serviceNode.SelectSingleNode("default:SCPDURL", nm).InnerText.Trim();
-            _serviceID = serviceNode.SelectSingleNode("default:serviceId", nm).InnerText.Trim();
-            _serviceType = serviceNode.SelectSingleNode("default:serviceType", nm).InnerText.Trim();
+            XNamespace nm = serviceElement.GetDefaultNamespace();
+            _controlUrl = serviceElement.Element(nm + "controlURL")?.Value.Trim();
+            _eventSubUrl = serviceElement.Element(nm + "eventSubURL")?.Value.Trim();
+            _scpdUrl = serviceElement.Element(nm + "SCPDURL")?.Value.Trim();
+            _serviceId = serviceElement.Element(nm + "serviceId").Value.Trim();
+            _serviceType = serviceElement.Element(nm + "serviceType").Value.Trim();
             _parentDevice = parentDevice;
             _rootDevice = rootDevice;
             _interfaces = new UPnPServiceInterfaces(this);
@@ -97,112 +88,79 @@ namespace Honoo.Net
 
         #region Common
 
-        /// <summary>
-        /// Gets SCPD information form SCPD url.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
+        public XElement DecodeResponse(string response, string action)
+        {
+            XDocument doc = XDocument.Parse(response);
+            XNamespace nms = doc.Root.GetNamespaceOfPrefix("s");
+            XNamespace nmu = _serviceType;
+            return doc.Root.Element(nms + "Body").Element(nmu + (action + "Response"));
+
+            //XmlDocument doc = new XmlDocument() { XmlResolver = null };
+            //doc.LoadXml(response);
+            //XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
+            //ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
+            //ns.AddNamespace("u", _serviceType);
+            //return doc.SelectSingleNode($"/s:Envelope/s:Body/u:{action}Response", ns);
+        }
+
+        /// <inheritdoc/>
         public string GetScpdInformation()
         {
             _rootDevice.Client.Headers.Clear();
-            _rootDevice.Client.Headers.Add("Cache-Control: no-store");
-            _rootDevice.Client.Headers.Add("Pragma: no-cache");
-            _rootDevice.Client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _rootDevice.Client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            _rootDevice.Client.Headers.Add(_rootDevice.Headers);
             return _rootDevice.Client.DownloadString(_scpdUrl);
         }
 
-        /// <summary>
-        /// Post action, and gets response xml string. Query actions from service's SCPD information description page.
-        /// </summary>
-        /// <param name="action">action name.</param>
-        /// <param name="arguments">action arguments. The arguments must conform to the order specified. Set 'null' if haven't arguments.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         public string PostAction(string action, IDictionary<string, string> arguments)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<?xml version=\"1.0\"?>");
-            sb.AppendLine("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">");
-            sb.AppendLine("  <s:Body>");
-            sb.AppendLine("    <u:" + action + " xmlns:u=\"" + _serviceType + "\">");
+            sb.AppendLine($"<?xml version=\"1.0\"?>");
+            sb.AppendLine($"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">");
+            sb.AppendLine($"  <s:Body>");
+            sb.AppendLine($"    <u:{action} xmlns:u=\"{_serviceType}\">");
             if (arguments != null && arguments.Count > 0)
             {
                 foreach (KeyValuePair<string, string> argument in arguments)
                 {
-                    sb.AppendLine("      <" + argument.Key + ">" + argument.Value + "</" + argument.Key + ">");
+                    sb.AppendLine($"      <{argument.Key}>{argument.Value}</{argument.Key}>");
                 }
             }
-            sb.AppendLine("    </u:" + action + ">");
-            sb.AppendLine("  </s:Body>");
-            sb.AppendLine("</s:Envelope>");
+            sb.AppendLine($"    </u:{action}>");
+            sb.AppendLine($"  </s:Body>");
+            sb.AppendLine($"</s:Envelope>");
             string body = sb.ToString();
             _rootDevice.Client.Headers.Clear();
-            _rootDevice.Client.Headers.Add("Cache-Control: no-store");
-            _rootDevice.Client.Headers.Add("Pragma: no-cache");
-            _rootDevice.Client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _rootDevice.Client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            _rootDevice.Client.Headers.Add(_rootDevice.Headers);
             _rootDevice.Client.Headers.Add($"SOAPAction: \"{_serviceType}#{action}\"");
-            if (_rootDevice.HeaderExtensions.Count > 0)
-            {
-                foreach (var header in _rootDevice.HeaderExtensions)
-                {
-                    _rootDevice.Client.Headers.Add(header.Key, header.Value);
-                }
-            }
             return _rootDevice.Client.UploadString(_controlUrl, "POST", body);
         }
 
-        /// <summary>
-        ///  Remove event subscription.
-        /// </summary>
-        /// <param name="sid">Event subscription sid.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         public void RemoveEventSubscription(string sid)
         {
             _rootDevice.Client.Headers.Clear();
-            _rootDevice.Client.Headers.Add("Cache-Control: no-store");
-            _rootDevice.Client.Headers.Add("Pragma: no-cache");
-            _rootDevice.Client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _rootDevice.Client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            _rootDevice.Client.Headers.Add(_rootDevice.Headers);
             _rootDevice.Client.Headers.Add($"SID: {sid}");
             _rootDevice.Client.UploadString(_eventSubUrl, "UNSUBSCRIBE", string.Empty);
         }
 
-        /// <summary>
-        ///  Renewal event subscription.
-        /// </summary>
-        /// <param name="sid">Event subscription sid.</param>
-        /// <param name="durationSecond">Subscription duration. Unit is second.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         public void RenewalEventSubscription(string sid, uint durationSecond)
         {
             _rootDevice.Client.Headers.Clear();
-            _rootDevice.Client.Headers.Add("Cache-Control: no-store");
-            _rootDevice.Client.Headers.Add("Pragma: no-cache");
-            _rootDevice.Client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _rootDevice.Client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            _rootDevice.Client.Headers.Add(_rootDevice.Headers);
             _rootDevice.Client.Headers.Add($"SID: {sid}");
             _rootDevice.Client.Headers.Add($"TIMEOUT: Second-{durationSecond}");
             _rootDevice.Client.UploadString(_eventSubUrl, "SUBSCRIBE", string.Empty);
         }
 
-        /// <summary>
-        /// Set event subscription by event subscriber url and gets event SID.
-        /// </summary>
-        /// <param name="subscriberUrl">Event subscriber url.</param>
-        /// <param name="durationSecond">Subscription duration. Unit is second.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         public string SetEventSubscription(string subscriberUrl, uint durationSecond)
         {
             _rootDevice.Client.Headers.Clear();
-            _rootDevice.Client.Headers.Add("Cache-Control: no-store");
-            _rootDevice.Client.Headers.Add("Pragma: no-cache");
-            _rootDevice.Client.Headers.Add("Content-Type: text/xml; charset=utf-8");
-            _rootDevice.Client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            _rootDevice.Client.Headers.Add(_rootDevice.Headers);
             _rootDevice.Client.Headers.Add("NT: upnp:event");
             _rootDevice.Client.Headers.Add($"CALLBACK: <{subscriberUrl}>");
             _rootDevice.Client.Headers.Add($"TIMEOUT: Second-{durationSecond}");
@@ -214,24 +172,15 @@ namespace Honoo.Net
 
         #region WANIPConnection1
 
-        /// <summary>
-        /// Add port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to mapping.</param>
-        /// <param name="internalClient">The internal client to mapping.</param>
-        /// <param name="internalPort">The internal port to mapping.</param>
-        /// <param name="enabled">Enabled.</param>
-        /// <param name="description">Port mapping description.</param>
-        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.AddPortMapping(string protocol,
-                                                         ushort externalPort,
-                                                         IPAddress internalClient,
-                                                         ushort internalPort,
-                                                         bool enabled,
-                                                         string description,
-                                                         uint leaseDuration)
+                                                      string remoteHost,
+                                                      ushort externalPort,
+                                                      IPAddress internalClient,
+                                                      ushort internalPort,
+                                                      bool enabled,
+                                                      string description,
+                                                      uint leaseDuration)
         {
             if (internalClient is null)
             {
@@ -240,7 +189,7 @@ namespace Honoo.Net
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
                 { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
+                { "NewRemoteHost", remoteHost },
                 { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
                 { "NewInternalClient", internalClient.ToString() },
                 { "NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture) },
@@ -251,89 +200,49 @@ namespace Honoo.Net
             PostAction("AddPortMapping", arguments);
         }
 
-        /// <summary>
-        /// Delete port mapping.
-        /// </summary>
-        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to delete mapping.</param>
-        /// <exception cref="Exception"/>
-        void IUPnPWANConnectionService.DeletePortMapping(string protocol, ushort externalPort)
+        /// <inheritdoc/>
+        void IUPnPWANConnectionService.DeletePortMapping(string protocol, string remoteHost, ushort externalPort)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
                 { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
+                { "NewRemoteHost", remoteHost },
                 { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
             };
             PostAction("DeletePortMapping", arguments);
         }
 
-        /// <summary>
-        /// Force termination to change ConnectionStatus to Disconnected.
-        /// </summary>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.ForceTermination()
         {
             PostAction("ForceTermination", null);
         }
 
-        /// <summary>
-        /// Get auto disconnect time in seconds.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         uint IUPnPWANConnectionService.GetAutoDisconnectTime()
         {
             string response = PostAction("GetAutoDisconnectTime", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetAutoDisconnectTimeResponse", ns);
-            return uint.Parse(node.SelectSingleNode("NewAutoDisconnectTime").InnerText.Trim(), CultureInfo.InvariantCulture);
+            XElement element = DecodeResponse(response, "GetAutoDisconnectTime");
+            return uint.Parse(element.Element("NewAutoDisconnectTime").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// Get Connection type info. Possible types maybe wrong because I don't know what the separator is. :(
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPConnectionTypeInfo IUPnPWANConnectionService.GetConnectionTypeInfo()
         {
             string response = PostAction("GetConnectionTypeInfo", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetConnectionTypeInfoResponse", ns);
-            return new UPnPConnectionTypeInfo(node);
+            XElement element = DecodeResponse(response, "GetConnectionTypeInfo");
+            return new UPnPConnectionTypeInfo(element);
         }
 
-        /// <summary>
-        /// Get external IPAddress.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANConnectionService.GetExternalIPAddress()
         {
             string response = PostAction("GetExternalIPAddress", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetExternalIPAddressResponse", ns);
-            return node.SelectSingleNode("NewExternalIPAddress").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetExternalIPAddress");
+            return element.Element("NewExternalIPAddress").Value.Trim();
         }
 
-        /// <summary>
-        /// Get generic port mapping entry.
-        /// </summary>
-        /// <param name="index">The index of entry.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPPortMappingEntry IUPnPWANConnectionService.GetGenericPortMappingEntry(uint index)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -341,131 +250,69 @@ namespace Honoo.Net
                 { "NewPortMappingIndex", index.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetGenericPortMappingEntry", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetGenericPortMappingEntryResponse", ns);
-            return new UPnPPortMappingEntry(node);
+            XElement element = DecodeResponse(response, "GetGenericPortMappingEntry");
+            return new UPnPPortMappingEntry(element);
         }
 
-        /// <summary>
-        /// Get Idle disconnect time in seconds.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         uint IUPnPWANConnectionService.GetIdleDisconnectTime()
         {
             string response = PostAction("GetIdleDisconnectTime", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetIdleDisconnectTimeResponse", ns);
-            return uint.Parse(node.SelectSingleNode("NewIdleDisconnectTime").InnerText.Trim(), CultureInfo.InvariantCulture);
+            XElement element = DecodeResponse(response, "GetIdleDisconnectTime");
+            return uint.Parse(element.Element("NewIdleDisconnectTime").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// Get NAT RSIP status.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPNatRsipStatus IUPnPWANConnectionService.GetNATRSIPStatus()
         {
             string response = PostAction("GetNATRSIPStatus", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetNATRSIPStatusResponse", ns);
-            return new UPnPNatRsipStatus(node);
+            XElement element = DecodeResponse(response, "GetNATRSIPStatus");
+            return new UPnPNatRsipStatus(element);
         }
 
-        /// <summary>
-        /// Get specific port mapping entry.
-        /// </summary>
-        /// <param name="protocol">The protocol to query. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to query.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        UPnPPortMappingEntry IUPnPWANConnectionService.GetSpecificPortMappingEntry(string protocol, ushort externalPort)
+        /// <inheritdoc/>
+        UPnPPortMappingEntry IUPnPWANConnectionService.GetSpecificPortMappingEntry(string protocol, string remoteHost, ushort externalPort)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
                 { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
+                { "NewRemoteHost", remoteHost },
                 { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetSpecificPortMappingEntry", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetSpecificPortMappingEntryResponse", ns);
-            return new UPnPPortMappingEntry(protocol, string.Empty, externalPort, node);
+            XElement element = DecodeResponse(response, "GetSpecificPortMappingEntry");
+            return new UPnPPortMappingEntry(protocol, string.Empty, externalPort, element);
         }
 
-        /// <summary>
-        /// Get status info.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPStatusInfo IUPnPWANConnectionService.GetStatusInfo()
         {
             string response = PostAction("GetStatusInfo", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetStatusInfoResponse", ns);
-            return new UPnPStatusInfo(node);
+            XElement element = DecodeResponse(response, "GetStatusInfo");
+            return new UPnPStatusInfo(element);
         }
 
-        /// <summary>
-        /// Get warn disconnect delay in seconds.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         uint IUPnPWANConnectionService.GetWarnDisconnectDelay()
         {
             string response = PostAction("GetWarnDisconnectDelay", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetWarnDisconnectDelayResponse", ns);
-            return uint.Parse(node.SelectSingleNode("NewWarnDisconnectDelay").InnerText.Trim(), CultureInfo.InvariantCulture);
+            XElement element = DecodeResponse(response, "GetWarnDisconnectDelay");
+            return uint.Parse(element.Element("NewWarnDisconnectDelay").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// Request connection.
-        /// </summary>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.RequestConnection()
         {
             PostAction("RequestConnection", null);
         }
 
-        /// <summary>
-        /// Request termination to change ConnectionStatus to Disconnected.
-        /// </summary>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.RequestTermination()
         {
             PostAction("RequestTermination", null);
         }
 
-        /// <summary>
-        /// Set auto disconnect time in seconds.
-        /// </summary>
-        /// <param name="seconds">Sets the time (in seconds) after which an active connection is automatically disconnected.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.SetAutoDisconnectTime(uint seconds)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -475,11 +322,7 @@ namespace Honoo.Net
             PostAction("SetAutoDisconnectTime", arguments);
         }
 
-        /// <summary>
-        /// Set connection type.
-        /// </summary>
-        /// <param name="connectionType">The connection type. This property accepts the following: "Unconfigured", "IP_Routed", "IP_Bridged".</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.SetConnectionType(string connectionType)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -489,11 +332,7 @@ namespace Honoo.Net
             PostAction("SetConnectionType", arguments);
         }
 
-        /// <summary>
-        /// Set Idle disconnect time in seconds.
-        /// </summary>
-        /// <param name="seconds">Specifies the idle time (in seconds) after which a connection may be disconnected. The actual disconnect will occur after WarnDisconnectDelay time elapses.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.SetIdleDisconnectTime(uint seconds)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -503,11 +342,7 @@ namespace Honoo.Net
             PostAction("SetIdleDisconnectTime", arguments);
         }
 
-        /// <summary>
-        /// Set warn disconnect delay in seconds.
-        /// </summary>
-        /// <param name="seconds">Specifies the number of seconds of warning to each (potentially) active user of a connection before a connection is terminated.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANConnectionService.SetWarnDisconnectDelay(uint seconds)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -521,25 +356,15 @@ namespace Honoo.Net
 
         #region WANIPConnection2
 
-        /// <summary>
-        /// Add any port mapping, and gets reserved port.
-        /// </summary>
-        /// <param name="protocol">The protocol to mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="externalPort">The external port to mapping.</param>
-        /// <param name="internalClient">The internal client to mapping.</param>
-        /// <param name="internalPort">The internal port to mapping.</param>
-        /// <param name="enabled">Enabled.</param>
-        /// <param name="description">Port mapping description.</param>
-        /// <param name="leaseDuration">Lease duration. This property accepts the following 0 - 604800. Unit is seconds. Set 0 to permanents.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         ushort IUPnPWANIPConnection2Service.AddAnyPortMapping(string protocol,
-                                                               ushort externalPort,
-                                                               IPAddress internalClient,
-                                                               ushort internalPort,
-                                                               bool enabled,
-                                                               string description,
-                                                               uint leaseDuration)
+                                                              string remoteHost,
+                                                              ushort externalPort,
+                                                              IPAddress internalClient,
+                                                              ushort internalPort,
+                                                              bool enabled,
+                                                              string description,
+                                                              uint leaseDuration)
         {
             if (internalClient is null)
             {
@@ -548,7 +373,7 @@ namespace Honoo.Net
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
                 { "NewProtocol", protocol },
-                { "NewRemoteHost", string.Empty },
+                { "NewRemoteHost", remoteHost },
                 { "NewExternalPort", externalPort.ToString(CultureInfo.InvariantCulture) },
                 { "NewInternalClient", internalClient.ToString() },
                 { "NewInternalPort", internalPort.ToString(CultureInfo.InvariantCulture) },
@@ -557,23 +382,11 @@ namespace Honoo.Net
                 { "NewLeaseDuration", leaseDuration.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("AddAnyPortMapping", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:AddAnyPortMappingResponse", ns);
-            return ushort.Parse(node.SelectSingleNode("NewReservedPort").InnerText.Trim(), CultureInfo.InvariantCulture);
+            XElement element = DecodeResponse(response, "AddAnyPortMapping");
+            return ushort.Parse(element.Element("NewReservedPort").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// Delete port mapping range.
-        /// </summary>
-        /// <param name="protocol">The protocol to delete mapping. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="startPort">The start port of search.</param>
-        /// <param name="endPort">The end port of search.</param>
-        /// <param name="manage">Elevate privileges.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPWANIPConnection2Service.DeletePortMappingRange(string protocol, ushort startPort, ushort endPort, bool manage)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -586,16 +399,8 @@ namespace Honoo.Net
             PostAction("DeletePortMappingRange", arguments);
         }
 
-        /// <summary>
-        /// Get list of port mapping entries.
-        /// </summary>
-        /// <param name="protocol">The protocol to query. This property accepts the following: "TCP", "UDP".</param>
-        /// <param name="startPort">The start port of search.</param>
-        /// <param name="endPort">The end port of search.</param>
-        /// <param name="manage">Elevate privileges.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
-        string IUPnPWANIPConnection2Service.GetListOfPortMappings(string protocol, ushort startPort, ushort endPort, bool manage)
+        /// <inheritdoc/>
+        string IUPnPWANIPConnection2Service.GetListOfPortMappings(string protocol, ushort startPort, ushort endPort, bool manage, ushort maxCount)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
             {
@@ -603,134 +408,70 @@ namespace Honoo.Net
                 { "NewStartPort", startPort.ToString(CultureInfo.InvariantCulture) },
                 { "NewEndPort", endPort.ToString(CultureInfo.InvariantCulture) },
                 { "NewManage", manage ? "1" : "0" },
-                { "NewNumberOfPorts", "65535" },
+                { "NewNumberOfPorts", maxCount.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetListOfPortMappings", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetListOfPortMappingsResponse", ns);
-            return node.SelectSingleNode("NewPortListing").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetListOfPortMappings");
+            return element.Element("NewPortListing").Value.Trim();
         }
 
         #endregion WANIPConnection2
 
         #region WANPPPConnection1
 
-        /// <summary>
-        /// Gets link layer max bit rates.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPLinkLayerMaxBitRates IUPnPWANPPPConnection1Service.GetLinkLayerMaxBitRates()
         {
             string response = PostAction("GetLinkLayerMaxBitRates", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetLinkLayerMaxBitRatesResponse", ns);
-            return new UPnPLinkLayerMaxBitRates(node);
+            XElement element = DecodeResponse(response, "GetLinkLayerMaxBitRates");
+            return new UPnPLinkLayerMaxBitRates(element);
         }
 
-        /// <summary>
-        /// Gets password.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANPPPConnection1Service.GetPassword()
         {
             string response = PostAction("GetPassword", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetPasswordResponse", ns);
-            return node.SelectSingleNode("NewPassword").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetPassword");
+            return element.Element("NewPassword").Value.Trim();
         }
 
-        /// <summary>
-        /// Gets PPP authentication protocol.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANPPPConnection1Service.GetPPPAuthenticationProtocol()
         {
             string response = PostAction("GetPPPAuthenticationProtocol", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetPPPAuthenticationProtocolResponse", ns);
-            return node.SelectSingleNode("NewPPPAuthenticationProtocol").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetPPPAuthenticationProtocol");
+            return element.Element("NewPPPAuthenticationProtocol").Value.Trim();
         }
 
-        /// <summary>
-        /// Gets PPP compression protocol.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANPPPConnection1Service.GetPPPCompressionProtocol()
         {
             string response = PostAction("GetPPPCompressionProtocol", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetPPPCompressionProtocolResponse", ns);
-            return node.SelectSingleNode("NewPPPCompressionProtocol").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetPPPCompressionProtocol");
+            return element.Element("NewPPPCompressionProtocol").Value.Trim();
         }
 
-        /// <summary>
-        /// Gets PPP encryption protocol.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANPPPConnection1Service.GetPPPEncryptionProtocol()
         {
             string response = PostAction("GetPPPEncryptionProtocol", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetPPPEncryptionProtocolResponse", ns);
-            return node.SelectSingleNode("NewPPPEncryptionProtocol").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetPPPEncryptionProtocol");
+            return element.Element("NewPPPEncryptionProtocol").Value.Trim();
         }
 
-        /// <summary>
-        /// Gets user name.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPWANPPPConnection1Service.GetUserName()
         {
             string response = PostAction("GetUserName", null);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetUserNameResponse", ns);
-            return node.SelectSingleNode("NewUserName").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetUserName");
+            return element.Element("NewUserName").Value.Trim();
         }
 
         #endregion WANPPPConnection1
 
         #region AVTransport1
 
-        /// <summary>
-        /// Get current transport actions.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPAVTransport1Service.GetCurrentTransportActions(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -738,21 +479,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetCurrentTransportActions", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetCurrentTransportActionsResponse", ns);
-            return node.SelectSingleNode("Actions").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetCurrentTransportActions");
+            return element.Element("Actions").Value.Trim();
         }
 
-        /// <summary>
-        /// Get device capabilities.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPDeviceCapabilities IUPnPAVTransport1Service.GetDeviceCapabilities(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -760,21 +491,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetDeviceCapabilities", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetDeviceCapabilitiesResponse", ns);
-            return new UPnPDeviceCapabilities(node);
+            XElement element = DecodeResponse(response, "GetDeviceCapabilities");
+            return new UPnPDeviceCapabilities(element);
         }
 
-        /// <summary>
-        /// Get media info.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPMediaInfo IUPnPAVTransport1Service.GetMediaInfo(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -782,21 +503,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetMediaInfo", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetMediaInfoResponse", ns);
-            return new UPnPMediaInfo(node);
+            XElement element = DecodeResponse(response, "GetMediaInfo");
+            return new UPnPMediaInfo(element);
         }
 
-        /// <summary>
-        /// Get position info.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPPositionInfo IUPnPAVTransport1Service.GetPositionInfo(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -804,21 +515,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetPositionInfo", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetPositionInfoResponse", ns);
-            return new UPnPPositionInfo(node);
+            XElement element = DecodeResponse(response, "GetPositionInfo");
+            return new UPnPPositionInfo(element);
         }
 
-        /// <summary>
-        /// Get transport info.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPTransportInfo IUPnPAVTransport1Service.GetTransportInfo(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -826,27 +527,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetTransportInfo", arguments);
-
-            //XElement element = XElement.Parse(response);
-            //XNamespace ns1 = "http://schemas.xmlsoap.org/soap/envelope/";
-            //XNamespace ns2 = _serviceType;
-            //element.Element(ns1 + "Envelope").Element(ns1 + "Body").Element(ns2 + "GetTransportInfoResponse");
-
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetTransportInfoResponse", ns);
-            return new UPnPTransportInfo(node);
+            XElement element = DecodeResponse(response, "GetTransportInfo");
+            return new UPnPTransportInfo(element);
         }
 
-        /// <summary>
-        /// Get transport settings.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPTransportSettings IUPnPAVTransport1Service.GetTransportSettings(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -854,20 +539,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetTransportSettings", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetTransportSettingsResponse", ns);
-            return new UPnPTransportSettings(node);
+            XElement element = DecodeResponse(response, "GetTransportSettings");
+            return new UPnPTransportSettings(element);
         }
 
-        /// <summary>
-        /// Jump next.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Next(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -877,11 +553,7 @@ namespace Honoo.Net
             PostAction("Next", arguments);
         }
 
-        /// <summary>
-        /// Pause.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Pause(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -891,12 +563,7 @@ namespace Honoo.Net
             PostAction("Pause", arguments);
         }
 
-        /// <summary>
-        /// Play.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="speed">Transport play speed. This property is usually "1".</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Play(uint instanceID, string speed)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -907,11 +574,7 @@ namespace Honoo.Net
             PostAction("Play", arguments);
         }
 
-        /// <summary>
-        /// Jump previous.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Previous(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -921,11 +584,7 @@ namespace Honoo.Net
             PostAction("Previous", arguments);
         }
 
-        /// <summary>
-        /// Record. whether the device outputs the resource to a screen or speakers while recording is device dependent.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Record(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -935,18 +594,7 @@ namespace Honoo.Net
             PostAction("Record", arguments);
         }
 
-        /// <summary>
-        /// Seek. This state variable is introduced to provide type information for the “target” parameter in action “Seek”. It
-        /// <br />indicates the target position of the seek action, in terms of units defined by state variable A_ARG_TYPE_SeekMode.
-        /// <br />The data type of this variable is ‘string’. However, depending on the actual seek mode used, it must contains
-        /// <br />string representations of values of UPnP types ‘ui4’ (ABS_COUNT, REL_COUNT, TRACK_NR, TAPE-INDEX, FRAME),
-        /// <br />‘time’ (ABS_TIME, REL_TIME) or ‘float‘ (CHANNEL_FREQ, in Hz). Supported ranges of these integer, time or float
-        /// <br />values are device-dependent.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="unit">The seek mode.</param>
-        /// <param name="target">Target by seek mode. REL_TIME: 00:33:33, TRACK_NR(Track number of CD-DA): 1.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Seek(uint instanceID, string unit, string target)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -958,13 +606,7 @@ namespace Honoo.Net
             PostAction("Seek", arguments);
         }
 
-        /// <summary>
-        /// Set audio/video transport uri. Need DLNA http server. Used by "UPnPDlnaServer" or design by youself.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="currentURI">Current audio/video transport uri.</param>
-        /// <param name="currentURIMetaData">Current audio/video transport uri meta data.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.SetAVTransportURI(uint instanceID, string currentURI, string currentURIMetaData)
         {
             currentURI = $"<![CDATA[{currentURI}]]>";
@@ -977,13 +619,7 @@ namespace Honoo.Net
             PostAction("SetAVTransportURI", arguments);
         }
 
-        /// <summary>
-        /// Set audio/video transport uri. Need DLNA http server. Used by "UPnPDlnaServer" or design by youself.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="nextURI">Next audio/video transport uri.</param>
-        /// <param name="nextURIMetaData">Next audio/video transport uri meta data.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.SetNextAVTransportURI(uint instanceID, string nextURI, string nextURIMetaData)
         {
             nextURI = $"<![CDATA[{nextURI}]]>";
@@ -996,13 +632,7 @@ namespace Honoo.Net
             PostAction("SetNextAVTransportURI", arguments);
         }
 
-        /// <summary>
-        /// Set play mode.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="playMode">Current play mode. This property accepts the following: "NORMAL", "SHUFFLE", "REPEAT_ONE", "REPEAT_ALL", "RANDOM", "DIRECT_1", "INTRO", Vendor-defined.
-        /// </param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.SetPlayMode(uint instanceID, string playMode)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -1013,13 +643,7 @@ namespace Honoo.Net
             PostAction("SetPlayMode", arguments);
         }
 
-        /// <summary>
-        /// Set record quality mode.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="recordQualityMode">Record quality mode. This property accepts the following: "0:EP", "1:LP", "2:SP", "0:BASIC", "1:MEDIUM", "2:HIGH", "NOT_IMPLEMENTED", Vendor-defined.
-        /// </param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.SetRecordQualityMode(uint instanceID, string recordQualityMode)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -1030,11 +654,7 @@ namespace Honoo.Net
             PostAction("SetRecordQualityMode", arguments);
         }
 
-        /// <summary>
-        /// Stop.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         void IUPnPAVTransport1Service.Stop(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -1048,13 +668,7 @@ namespace Honoo.Net
 
         #region AVTransport2
 
-        /// <summary>
-        /// Get DRMState.
-        /// <br />This property accepts the following: "OK", "UNKNOWN", "PROCESSING_CONTENT_KEY", "CONTENT_KEY_FAILURE", "ATTEMPTING_AUTHENTICATION", "FAILED_AUTHENTICATION", "NOT_AUTHENTICATED", "DEVICE_REVOCATION".
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         string IUPnPAVTransport2Service.GetDRMState(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -1062,21 +676,11 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetDRMState", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetDRMStateResponse", ns);
-            return node.SelectSingleNode("CurrentDRMState").InnerText.Trim();
+            XElement element = DecodeResponse(response, "GetDRMState");
+            return element.Element("CurrentDRMState").Value.Trim();
         }
 
-        /// <summary>
-        /// Get media info ext.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"/>
+        /// <inheritdoc/>
         UPnPMediaInfoExt IUPnPAVTransport2Service.GetMediaInfoExt(uint instanceID)
         {
             Dictionary<string, string> arguments = new Dictionary<string, string>
@@ -1084,42 +688,507 @@ namespace Honoo.Net
                 { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
             };
             string response = PostAction("GetMediaInfo_Ext", arguments);
-            XmlDocument doc = new XmlDocument() { XmlResolver = null };
-            doc.LoadXml(response);
-            XmlNamespaceManager ns = new XmlNamespaceManager(doc.NameTable);
-            ns.AddNamespace("s", "http://schemas.xmlsoap.org/soap/envelope/");
-            ns.AddNamespace("u", _serviceType);
-            XmlNode node = doc.SelectSingleNode("/s:Envelope/s:Body/u:GetMediaInfo_ExtResponse", ns);
-            return new UPnPMediaInfoExt(node);
+            XElement element = DecodeResponse(response, "GetMediaInfo_Ext");
+            return new UPnPMediaInfoExt(element);
         }
 
-        /// <summary>
-        /// Get state variables. Allways throw <see cref="NotImplementedException"/>() because I'm not a AVTransport2 device :(.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="stateVariableList"> If the argument is set to "<see langword="*"/>", the action MUST return all the supported state variables of the service, including the vendor-extended state variables except for LastChange and any A_ARG_TYPE_xxx variables.</param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"/>
+        /// <inheritdoc/>
         IDictionary<string, string> IUPnPAVTransport2Service.GetStateVariables(uint instanceID, string stateVariableList)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Set state variables. Allways throw <see cref="NotImplementedException"/>() because I'm not a AVTransport2 device :(.
-        /// </summary>
-        /// <param name="instanceID">Instance ID.</param>
-        /// <param name="avTransportUDN"></param>
-        /// <param name="serviceType"></param>
-        /// <param name="serviceId"></param>
-        /// <param name="stateVariableValuePairs"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <inheritdoc/>
         string IUPnPAVTransport2Service.SetStateVariables(uint instanceID, string avTransportUDN, string serviceType, string serviceId, IDictionary<string, string> stateVariableValuePairs)
         {
             throw new NotImplementedException();
         }
 
         #endregion AVTransport2
+
+        #region ConnectionManager1
+
+        /// <inheritdoc/>
+        void IUPnPConnectionManager1Service.ConnectionComplete(uint connectionID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "ConnectionID", connectionID.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("ConnectionComplete", arguments);
+        }
+
+        /// <inheritdoc/>
+        string IUPnPConnectionManager1Service.GetCurrentConnectionIDs()
+        {
+            string response = PostAction("GetCurrentConnectionIDs", null);
+            XElement element = DecodeResponse(response, "GetCurrentConnectionIDs");
+            return element.Element("CurrentConnectionIDs").Value.Trim();
+        }
+
+        /// <inheritdoc/>
+        UPnPAVConnectionInfo IUPnPConnectionManager1Service.GetCurrentConnectionInfo(uint connectionID)
+        {
+            string response = PostAction("GetCurrentConnectionInfo", null);
+            XElement element = DecodeResponse(response, "GetCurrentConnectionInfo");
+            return new UPnPAVConnectionInfo(element);
+        }
+
+        /// <inheritdoc/>
+        UPnPProtocolInfo IUPnPConnectionManager1Service.GetProtocolInfo()
+        {
+            string response = PostAction("GetProtocolInfo", null);
+            XElement element = DecodeResponse(response, "GetProtocolInfo");
+            return new UPnPProtocolInfo(element);
+        }
+
+        /// <inheritdoc/>
+        UPnPAVPrepareConnectionInfo IUPnPConnectionManager1Service.PrepareForConnection(string remoteProtocolInfo, string peerConnectionManager, int peerConnectionID, string direction)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "RemoteProtocolInfo", remoteProtocolInfo },
+                { "PeerConnectionManager", peerConnectionManager },
+                { "PeerConnectionID", peerConnectionID.ToString(CultureInfo.InvariantCulture) },
+                { "Direction", direction },
+            };
+            string response = PostAction("PrepareForConnection", arguments);
+            XElement element = DecodeResponse(response, "PrepareForConnection");
+            return new UPnPAVPrepareConnectionInfo(element);
+        }
+
+        #endregion ConnectionManager1
+
+        #region RenderingControl1
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetBlueVideoBlackLevel(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetBlueVideoBlackLevel", arguments);
+            XElement element = DecodeResponse(response, "GetBlueVideoBlackLevel");
+            return ushort.Parse(element.Element("CurrentBlueVideoBlackLevel").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetBlueVideoGain(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetBlueVideoGain", arguments);
+            XElement element = DecodeResponse(response, "GetBlueVideoGain");
+            return ushort.Parse(element.Element("CurrentBlueVideoGain").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetBrightness(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetBrightness", arguments);
+            XElement element = DecodeResponse(response, "GetBrightness");
+            return ushort.Parse(element.Element("CurrentBrightness").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetColorTemperature(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetColorTemperature", arguments);
+            XElement element = DecodeResponse(response, "GetColorTemperature");
+            return ushort.Parse(element.Element("CurrentColorTemperature").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetContrast(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetContrast", arguments);
+            XElement element = DecodeResponse(response, "GetContrast");
+            return ushort.Parse(element.Element("CurrentContrast").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetGreenVideoBlackLevel(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetGreenVideoBlackLevel", arguments);
+            XElement element = DecodeResponse(response, "GetGreenVideoBlackLevel");
+            return ushort.Parse(element.Element("CurrentGreenVideoBlackLevel").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetGreenVideoGain(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetGreenVideoGain", arguments);
+            XElement element = DecodeResponse(response, "GetGreenVideoGain");
+            return ushort.Parse(element.Element("CurrentGreenVideoGain").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        short IUPnPRenderingControl1Service.GetHorizontalKeystone(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetHorizontalKeystone", arguments);
+            XElement element = DecodeResponse(response, "GetHorizontalKeystone");
+            return short.Parse(element.Element("CurrentHorizontalKeystone").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        bool IUPnPRenderingControl1Service.GetLoudness(uint instanceID, string channel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+            };
+            string response = PostAction("GetLoudness", arguments);
+            XElement element = DecodeResponse(response, "GetLoudness");
+            return Convert.ToBoolean(int.Parse(element.Element("CurrentLoudness").Value.Trim(), CultureInfo.InvariantCulture));
+        }
+
+        /// <inheritdoc/>
+        bool IUPnPRenderingControl1Service.GetMute(uint instanceID, string channel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+            };
+            string response = PostAction("GetMute", arguments);
+            XElement element = DecodeResponse(response, "GetMute");
+            return Convert.ToBoolean(int.Parse(element.Element("CurrentMute").Value.Trim(), CultureInfo.InvariantCulture));
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetRedVideoBlackLevel(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetRedVideoBlackLevel", arguments);
+            XElement element = DecodeResponse(response, "GetRedVideoBlackLevel");
+            return ushort.Parse(element.Element("CurrentRedVideoBlackLevel").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetRedVideoGain(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetRedVideoGain", arguments);
+            XElement element = DecodeResponse(response, "GetRedVideoGain");
+            return ushort.Parse(element.Element("CurrentRedVideoGain").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetSharpness(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetSharpness", arguments);
+            XElement element = DecodeResponse(response, "GetSharpness");
+            return ushort.Parse(element.Element("CurrentSharpness").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        short IUPnPRenderingControl1Service.GetVerticalKeystone(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("GetVerticalKeystone", arguments);
+            XElement element = DecodeResponse(response, "GetVerticalKeystone");
+            return short.Parse(element.Element("CurrentVerticalKeystone").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        ushort IUPnPRenderingControl1Service.GetVolume(uint instanceID, string channel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+            };
+            string response = PostAction("GetVolume", arguments);
+            XElement element = DecodeResponse(response, "GetVolume");
+            return ushort.Parse(element.Element("CurrentVolume").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        short IUPnPRenderingControl1Service.GetVolumeDB(uint instanceID, string channel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+            };
+            string response = PostAction("GetVolumeDB", arguments);
+            XElement element = DecodeResponse(response, "GetVolumeDB");
+            return short.Parse(element.Element("CurrentVolume").Value.Trim(), CultureInfo.InvariantCulture);
+        }
+
+        /// <inheritdoc/>
+        UPnPVolumeDBRange IUPnPRenderingControl1Service.GetVolumeDBRange(uint instanceID, string channel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+            };
+            string response = PostAction("GetVolumeDBRange", arguments);
+            XElement element = DecodeResponse(response, "GetVolumeDBRange");
+            return new UPnPVolumeDBRange(element);
+        }
+
+        /// <inheritdoc/>
+        string IUPnPRenderingControl1Service.ListPresets(uint instanceID)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+            };
+            string response = PostAction("ListPresets", arguments);
+            XElement element = DecodeResponse(response, "ListPresets");
+            return element.Element("CurrentPresetNameList").Value.Trim();
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SelectPreset(uint instanceID, string presetName)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "PresetName", presetName },
+            };
+            PostAction("SelectPreset", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetBlueVideoBlackLevel(uint instanceID, ushort blueVideoBlackLevel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredBlueVideoBlackLevel", blueVideoBlackLevel.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetBlueVideoBlackLevel", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetBlueVideoGain(uint instanceID, ushort blueVideoGain)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredBlueVideoGain", blueVideoGain.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetBlueVideoGain", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetBrightness(uint instanceID, ushort brightness)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredBrightness", brightness.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetBrightness", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetColorTemperature(uint instanceID, ushort colorTemperature)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredColorTemperature", colorTemperature.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetColorTemperature", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetContrast(uint instanceID, ushort contrast)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredContrast", contrast.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetContrast", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetGreenVideoBlackLevel(uint instanceID, ushort greenVideoBlackLevel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredGreenVideoBlackLevel", greenVideoBlackLevel.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetGreenVideoBlackLevel", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetGreenVideoGain(uint instanceID, ushort greenVideoGain)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredGreenVideoGain", greenVideoGain.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetGreenVideoGain", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetHorizontalKeystone(uint instanceID, short horizontalKeystone)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredHorizontalKeystone", horizontalKeystone.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetHorizontalKeystone", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetLoudness(uint instanceID, string channel, bool loudness)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+                { "DesiredLoudness", loudness? "1" : "0" },
+            };
+            PostAction("SetLoudness", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetMute(uint instanceID, string channel, bool mute)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+                { "DesiredMute", mute? "1" : "0" },
+            };
+            PostAction("SetMute", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetRedVideoBlackLevel(uint instanceID, ushort redVideoBlackLevel)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredRedVideoBlackLevel", redVideoBlackLevel.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetRedVideoBlackLevel", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetRedVideoGain(uint instanceID, ushort redVideoGain)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredRedVideoGain", redVideoGain.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetRedVideoGain", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetSharpness(uint instanceID, ushort sharpness)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredSharpness", sharpness.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetSharpness", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetVerticalKeystone(uint instanceID, short verticalKeystone)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "DesiredVerticalKeystone", verticalKeystone.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetVerticalKeystone", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetVolume(uint instanceID, string channel, ushort volume)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+                { "DesiredVolume", volume.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetVolume", arguments);
+        }
+
+        /// <inheritdoc/>
+        void IUPnPRenderingControl1Service.SetVolumeDB(uint instanceID, string channel, short volume)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "Channel", channel },
+                { "DesiredVolume", volume.ToString(CultureInfo.InvariantCulture) },
+            };
+            PostAction("SetVolumeDB", arguments);
+        }
+
+        #endregion RenderingControl1
+
+        #region RenderingControl2
+
+        /// <inheritdoc/>
+        IDictionary<string, string> IUPnPRenderingControl2Service.GetStateVariables(uint instanceID, string stateVariableList)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        string IUPnPRenderingControl2Service.SetStateVariables(uint instanceID, string renderingControlUDN, string serviceType, string serviceId, IDictionary<string, string> stateVariableValuePairs)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion RenderingControl2
     }
 }

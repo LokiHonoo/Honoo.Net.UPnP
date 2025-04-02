@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -28,13 +28,13 @@ namespace Honoo.Net
         #endregion Members
 
         /// <summary>
-        /// Initializes a new instance of the NatRsipStatus class.
+        /// Initializes a new instance of the UPnPNatRsipStatus class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPNatRsipStatus(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPNatRsipStatus(XElement element)
         {
-            _natEnabled = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewNATEnabled").InnerText.Trim(), CultureInfo.InvariantCulture));
-            _rsipAvailable = Convert.ToBoolean(int.Parse(node.SelectSingleNode("NewRSIPAvailable").InnerText.Trim(), CultureInfo.InvariantCulture));
+            _natEnabled = Convert.ToBoolean(int.Parse(element.Element("NewNATEnabled").Value.Trim(), CultureInfo.InvariantCulture));
+            _rsipAvailable = Convert.ToBoolean(int.Parse(element.Element("NewRSIPAvailable").Value.Trim(), CultureInfo.InvariantCulture));
         }
 
         /// <summary>

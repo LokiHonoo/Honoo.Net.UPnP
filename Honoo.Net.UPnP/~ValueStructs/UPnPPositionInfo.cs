@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -65,17 +65,17 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPPositionInfo class.
         /// </summary>
-        /// <param name="node">Response node.</param>
-        internal UPnPPositionInfo(XmlNode node)
+        /// <param name="element">Response element.</param>
+        internal UPnPPositionInfo(XElement element)
         {
-            _track = uint.Parse(node.SelectSingleNode("Track").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _trackURI = node.SelectSingleNode("TrackURI").InnerText.Trim();
-            _trackDuration = node.SelectSingleNode("TrackDuration").InnerText.Trim();
-            _trackMetaData = node.SelectSingleNode("TrackMetaData").InnerText.Trim();
-            _absTime = node.SelectSingleNode("AbsTime").InnerText.Trim();
-            _absCount = int.Parse(node.SelectSingleNode("AbsCount").InnerText.Trim(), CultureInfo.InvariantCulture);
-            _relTime = node.SelectSingleNode("RelTime").InnerText.Trim();
-            _relCount = int.Parse(node.SelectSingleNode("RelCount").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _track = uint.Parse(element.Element("Track").Value.Trim(), CultureInfo.InvariantCulture);
+            _trackURI = element.Element("TrackURI").Value.Trim();
+            _trackDuration = element.Element("TrackDuration").Value.Trim();
+            _trackMetaData = element.Element("TrackMetaData").Value.Trim();
+            _absTime = element.Element("AbsTime").Value.Trim();
+            _absCount = int.Parse(element.Element("AbsCount").Value.Trim(), CultureInfo.InvariantCulture);
+            _relTime = element.Element("RelTime").Value.Trim();
+            _relCount = int.Parse(element.Element("RelCount").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

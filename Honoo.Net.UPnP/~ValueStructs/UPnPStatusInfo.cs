@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace Honoo.Net
 {
@@ -38,13 +38,13 @@ namespace Honoo.Net
         /// <summary>
         /// Initializes a new instance of the UPnPStatusInfo class.
         /// </summary>
-        /// <param name="node">Response node.</param>
+        /// <param name="element">Response element.</param>
 
-        internal UPnPStatusInfo(XmlNode node)
+        internal UPnPStatusInfo(XElement element)
         {
-            _connectionStatus = node.SelectSingleNode("NewConnectionStatus").InnerText.Trim();
-            _lastConnectionError = node.SelectSingleNode("NewLastConnectionError").InnerText.Trim();
-            _uptime = uint.Parse(node.SelectSingleNode("NewUptime").InnerText.Trim(), CultureInfo.InvariantCulture);
+            _connectionStatus = element.Element("NewConnectionStatus").Value.Trim();
+            _lastConnectionError = element.Element("NewLastConnectionError").Value.Trim();
+            _uptime = uint.Parse(element.Element("NewUptime").Value.Trim(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
