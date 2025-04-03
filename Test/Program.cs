@@ -46,6 +46,11 @@ namespace Test
             //    "</s:Body>\r\n" +
             //    "</s:Envelope>";
 
+            //string stateVariableValuePairs = "<stateVariableValuePairs xmlns=\"urn:schemas-upnp-org:av:avs\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd\">\r\n" +
+            //    "  <stateVariable variableName=\"CurrentPlayMode\">NORMAL</stateVariable>\r\n" +
+            //    "  <stateVariable variableName=\"CurrentTrack\">3</stateVariable>\r\n" +
+            //    "</stateVariableValuePairs> ";
+
             ConsoleHelper.DisableQuickEditMode();
             while (true)
             {
@@ -97,9 +102,9 @@ namespace Test
             }
         }
 
-        private static void MediaServer_RequestFailed(UPnPServer server, HttpListenerRequest request, Exception exception)
+        private static void MediaServer_RequestFailed(UPnPServer sender, UPnPRequestFailedEventArgs e)
         {
-            Console.WriteLine(exception.ToString());
+            Console.WriteLine(e.Exception.ToString());
         }
 
         private static void ReadDevice(UPnPDevice device, string indent)
@@ -182,16 +187,16 @@ namespace Test
             service.DeletePortMapping("TCP", string.Empty, 4788);
         }
 
-        private static void UPnPAVTEventRaisedCallback(UPnPServer server, UPnPEventMessage message, object userState)
+        private static void UPnPAVTEventRaisedCallback(UPnPServer sender, UPnPEventMessage message, object userState)
         {
             var @interface = message.Interfaces.MediaRenderer;
             foreach (var instance in @interface.Instances.Values)
             {
                 Console.WriteLine(DateTime.Now + "     ================================================");
-                Console.WriteLine($"InstanceID {instance.InstanceID}");
+                Console.WriteLine($"InstanceID: {instance.InstanceID}");
                 foreach (var property in instance.Properties.Values)
                 {
-                    Console.Write(property.PropertyName + ":");
+                    Console.Write(property.Name + ":");
                     // Console.WriteLine(property.Attributes["val"]);
                     foreach (var att in property.Attributes)
                     {

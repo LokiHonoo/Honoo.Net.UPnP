@@ -14,7 +14,7 @@
 PortMapping v1 - implemented.  
 PortMapping v2 - implemented.  
 DLNA v1 - implemented.  
-DLNA v2 - 90 %.  
+DLNA v2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.   
 DLNA v3 - 0 %.  </Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/LokiHonoo/Honoo.Net.UPnP</PackageProjectUrl>

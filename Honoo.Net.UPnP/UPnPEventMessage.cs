@@ -7,32 +7,32 @@
     {
         #region Members
 
-        private readonly string _eventSubscriptionUrl;
-        private readonly string _eventXmlString;
         private readonly UPnPEventMessageInterfaces _interfaces;
-
-        /// <inheritdoc/>
-        public string EventSubscriptionUrl => _eventSubscriptionUrl;
-
-        /// <inheritdoc/>
-        public string EventXmlString => _eventXmlString;
+        private readonly string _lastChangeXml;
+        private readonly string _subscriptionUrl;
 
         /// <summary>
         /// UPnP event LastChange message interfaces.
         /// </summary>
         public UPnPEventMessageInterfaces Interfaces => _interfaces;
 
+        /// <inheritdoc/>
+        public string LastChangeXml => _lastChangeXml;
+
+        /// <inheritdoc/>
+        public string SubscriptionUrl => _subscriptionUrl;
+
         #endregion Members
 
         /// <summary>
         /// Initializes a new instance of the UPnPEventMessage class.
         /// </summary>
-        /// <param name="eventSubscriptionUrl">Event subscription url.</param>
-        /// <param name="eventXmlString">Event LastChange xml string.</param>
-        protected UPnPEventMessage(string eventSubscriptionUrl, string eventXmlString)
+        /// <param name="subscriptionUrl">Event subscription url.</param>
+        /// <param name="lastChangeXml">Event LastChange xml string.</param>
+        protected UPnPEventMessage(string subscriptionUrl, string lastChangeXml)
         {
-            _eventSubscriptionUrl = eventSubscriptionUrl;
-            _eventXmlString = eventXmlString;
+            _subscriptionUrl = subscriptionUrl;
+            _lastChangeXml = lastChangeXml;
             _interfaces = new UPnPEventMessageInterfaces(this);
         }
     }

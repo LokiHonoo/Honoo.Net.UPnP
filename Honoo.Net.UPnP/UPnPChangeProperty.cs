@@ -10,23 +10,23 @@ namespace Honoo.Net
         #region Members
 
         private readonly Dictionary<string, string> _attributes = new Dictionary<string, string>();
-        private readonly string _propertyName;
+        private readonly string _name;
 
         /// <summary>
-        /// Attributes.
+        /// gets property attributes.
         /// </summary>
         public Dictionary<string, string> Attributes => _attributes;
 
         /// <summary>
-        /// Property name.
+        /// gets property name.
         /// </summary>
-        public string PropertyName => _propertyName;
+        public string Name => _name;
 
         #endregion Members
 
-        internal UPnPChangeProperty(string propertyName)
+        internal UPnPChangeProperty(string name)
         {
-            _propertyName = propertyName;
+            _name = name;
         }
     }
 }

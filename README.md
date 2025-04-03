@@ -8,6 +8,8 @@
     - [Namespace](#namespace)
     - [PortMapping](#portmapping)
     - [DLNA](#dlna)
+  - [CHANGELOG](#changelog)
+    - [1.0.12](#1012)
   - [LICENSE](#license)
 
 ## INTRODUCTION
@@ -17,7 +19,7 @@ Simple UPnP. Provides port mapping, DLNA e.g..
 PortMapping v1 - implemented.  
 PortMapping v2 - implemented.  
 DLNA v1 - implemented.  
-DLNA v2 - 90 %.  
+DLNA v2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
 DLNA v3 - 0 %.
 
 ## GUIDE
@@ -78,7 +80,7 @@ private static void TestDlna()
 
     // Need setup port open for firewall. Administrator privileges are required.
     // Maybe need close firewall to test.
-    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.17.10:8080/"));
+    UPnPDlnaServer mediaServer = UPnP.CreateDlnaServer(new Uri("http://192.168.1.11:8080/"));
     mediaServer.RequestFailed += MediaServer_RequestFailed;
 
     string mediaUrl = mediaServer.AddMedia("E:\\Videos\\The Ankha Zone.mp4");
@@ -104,24 +106,23 @@ private static void TestDlna()
     mediaServer.Dispose();
 }
 
-private static void MediaServer_RequestFailed(UPnPServer server, HttpListenerRequest request, Exception exception)
+private static void MediaServer_RequestFailed(UPnPServer sender, UPnPRequestFailedEventArgs e)
 {
-    Console.WriteLine(exception.ToString());
+    Console.WriteLine(e.Exception.ToString());
 }
 
-private static void UPnPAVTEventRaisedCallback(UPnPServer server, UPnPEventMessage message, object userState)
+private static void UPnPAVTEventRaisedCallback(UPnPServer sender, UPnPEventMessage message, object userState)
 {
     var @interface = message.Interfaces.MediaRenderer;
     foreach (var instance in @interface.Instances.Values)
     {
         Console.WriteLine(DateTime.Now + "     ================================================");
-        Console.WriteLine($"InstanceID {instance.InstanceID}");
-        foreach (KeyValuePair<string, UPnPChangeAttributes> kv in instance.Properties)
+        Console.WriteLine($"InstanceID: {instance.InstanceID}");
+        foreach (var property in instance.Properties.Values)
         {
-            Console.Write(kv.Key + ":");
-            UPnPChangeAttributes atts = kv.Value;
-            // Console.WriteLine(atts["val"]);
-            foreach (var att in atts)
+            Console.Write(property.Name + ":");
+            // Console.WriteLine(property.Attributes["val"]);
+            foreach (var att in property.Attributes)
             {
                 Console.Write($" {att.Key}=\"{att.Value}\"");
             }
@@ -131,6 +132,20 @@ private static void UPnPAVTEventRaisedCallback(UPnPServer server, UPnPEventMessa
 }
 
 ```
+
+## CHANGELOG
+
+### 1.0.12
+
+**Features* WANIPConnection:1 - implemented.  
+**Features* WANIPConnection:2 - implemented.  
+**Features* WANPPPConnection:1 - implemented.  
+**Features* AVTransport:1 - implemented.  
+**Features* AVTransport:2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
+**Features* ConnectionManager:1 - implemented.  
+**Features* ConnectionManager:2 - implemented.  
+**Features* RenderingControl:1 - implemented.  
+**Features* RenderingControl:2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
 
 ## LICENSE
 

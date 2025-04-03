@@ -38,11 +38,10 @@ namespace Honoo.Net
         /// Executes after client request failed.
         /// </summary>
         /// <param name="server">The sender who raised the event.</param>
-        /// <param name="request">Dlna client request.</param>
-        /// <param name="exception">Exception.</param>
-        protected virtual void OnRequestFailed(UPnPServer server, HttpListenerRequest request, Exception exception)
+        /// <param name="e">EventArgs.</param>
+        protected virtual void OnRequestFailed(UPnPServer server, UPnPRequestFailedEventArgs e)
         {
-            RequestFailed?.Invoke(server, request, exception);
+            RequestFailed?.Invoke(server, e);
         }
 
         #endregion Events
@@ -155,10 +154,10 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="context"></param>
         /// <param name="url"></param>
+        /// <param name="status"></param>
         /// <param name="exception"></param>
-        /// <param name="handled"></param>
         /// <exception cref="Exception"></exception>
-        protected abstract void HandleContext(HttpListenerContext context, string url, out Exception exception, out bool handled);
+        protected abstract void HandleContext(HttpListenerContext context, string url, out UPnPRequestFailedStatus status, out Exception exception);
 
         private void GottenContext(IAsyncResult ar)
         {
@@ -167,21 +166,24 @@ namespace Honoo.Net
                 HttpListenerContext context = _listener.EndGetContext(ar);
                 _listener.BeginGetContext(GottenContext, null);
                 string url = context.Request.Url.AbsoluteUri;
-                HandleContext(context, url, out Exception exception, out bool handled);
+                HandleContext(context, url, out UPnPRequestFailedStatus status, out Exception exception);
                 context.Response.Close();
-                if (!handled)
+                if (status == UPnPRequestFailedStatus.Unhandled)
                 {
                     exception = new HttpListenerException(404, $"Unknown request url - \"{url}\"");
-                    OnRequestFailed(this, context.Request, exception);
+                    var e = new UPnPRequestFailedEventArgs(status, context.Request, exception);
+                    OnRequestFailed(this, e);
                 }
                 else if (exception != null)
                 {
-                    OnRequestFailed(this, context.Request, exception);
+                    var e = new UPnPRequestFailedEventArgs(status, context.Request, exception);
+                    OnRequestFailed(this, e);
                 }
             }
             catch (Exception ex)
             {
-                OnRequestFailed(this, null, ex);
+                var e = new UPnPRequestFailedEventArgs(UPnPRequestFailedStatus.ListenerBroken, null, ex);
+                OnRequestFailed(this, e);
             }
         }
     }

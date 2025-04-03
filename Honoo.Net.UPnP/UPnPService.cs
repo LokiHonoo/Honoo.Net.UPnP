@@ -695,13 +695,52 @@ namespace Honoo.Net
         /// <inheritdoc/>
         IDictionary<string, string> IUPnPAVTransport2Service.GetStateVariables(uint instanceID, string stateVariableList)
         {
-            throw new NotImplementedException();
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "StateVariableList", stateVariableList },
+            };
+            string response = PostAction("GetStateVariables", arguments);
+            XElement element = DecodeResponse(response, "GetStateVariables");
+            string stateVariableValuePairs = element.Element("StateVariableValuePairs").Value.Trim();
+            stateVariableValuePairs = stateVariableValuePairs.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">");
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            XDocument doc = XDocument.Parse(stateVariableValuePairs);
+            XNamespace nm = doc.Root.GetDefaultNamespace();
+            foreach (XElement stateVariable in doc.Descendants(nm + "stateVariable"))
+            {
+                string name = stateVariable.Attribute("variableName").Value.Trim();
+                string value = stateVariable.Value.Trim();
+                dictionary.Add(name, value);
+            }
+            return dictionary;
         }
 
         /// <inheritdoc/>
         string IUPnPAVTransport2Service.SetStateVariables(uint instanceID, string avTransportUDN, string serviceType, string serviceId, IDictionary<string, string> stateVariableValuePairs)
         {
-            throw new NotImplementedException();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"<stateVariableValuePairs xmlns=\"urn:schemas-upnp-org:av:avs\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd\">");
+            if (stateVariableValuePairs != null && stateVariableValuePairs.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> stateVariableValuePair in stateVariableValuePairs)
+                {
+                    sb.AppendLine($"  <stateVariable variableName=\"{stateVariableValuePair.Key}\">{stateVariableValuePair.Value}</stateVariable>");
+                }
+            }
+            sb.AppendLine($"</stateVariableValuePairs>");
+            string svvps = sb.ToString().Replace("<", "&lt;").Replace("\"", "&quot;").Replace(">", "&gt;");
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "AVTransportUDN", avTransportUDN },
+                { "ServiceType", serviceType },
+                { "ServiceId", serviceId },
+                { "StateVariableValuePairs", svvps },
+            };
+            string response = PostAction("SetStateVariables", arguments);
+            XElement element = DecodeResponse(response, "SetStateVariables");
+            return element.Element("StateVariableList").Value.Trim();
         }
 
         #endregion AVTransport2
@@ -1180,13 +1219,52 @@ namespace Honoo.Net
         /// <inheritdoc/>
         IDictionary<string, string> IUPnPRenderingControl2Service.GetStateVariables(uint instanceID, string stateVariableList)
         {
-            throw new NotImplementedException();
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "StateVariableList", stateVariableList },
+            };
+            string response = PostAction("GetStateVariables", arguments);
+            XElement element = DecodeResponse(response, "GetStateVariables");
+            string stateVariableValuePairs = element.Element("StateVariableValuePairs").Value.Trim();
+            stateVariableValuePairs = stateVariableValuePairs.Replace("&lt;", "<").Replace("&quot;", "\"").Replace("&gt;", ">");
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            XDocument doc = XDocument.Parse(stateVariableValuePairs);
+            XNamespace nm = doc.Root.GetDefaultNamespace();
+            foreach (XElement stateVariable in doc.Descendants(nm + "stateVariable"))
+            {
+                string name = stateVariable.Attribute("variableName").Value.Trim();
+                string value = stateVariable.Value.Trim();
+                dictionary.Add(name, value);
+            }
+            return dictionary;
         }
 
         /// <inheritdoc/>
         string IUPnPRenderingControl2Service.SetStateVariables(uint instanceID, string renderingControlUDN, string serviceType, string serviceId, IDictionary<string, string> stateVariableValuePairs)
         {
-            throw new NotImplementedException();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"<stateVariableValuePairs xmlns=\"urn:schemas-upnp-org:av:avs\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd\">");
+            if (stateVariableValuePairs != null && stateVariableValuePairs.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> stateVariableValuePair in stateVariableValuePairs)
+                {
+                    sb.AppendLine($"  <stateVariable variableName=\"{stateVariableValuePair.Key}\">{stateVariableValuePair.Value}</stateVariable>");
+                }
+            }
+            sb.AppendLine($"</stateVariableValuePairs>");
+            string svvps = sb.ToString().Replace("<", "&lt;").Replace("\"", "&quot;").Replace(">", "&gt;");
+            Dictionary<string, string> arguments = new Dictionary<string, string>
+            {
+                { "InstanceID", instanceID.ToString(CultureInfo.InvariantCulture) },
+                { "RenderingControlUDN", renderingControlUDN },
+                { "ServiceType", serviceType },
+                { "ServiceId", serviceId },
+                { "StateVariableValuePairs", svvps },
+            };
+            string response = PostAction("SetStateVariables", arguments);
+            XElement element = DecodeResponse(response, "SetStateVariables");
+            return element.Element("StateVariableList").Value.Trim();
         }
 
         #endregion RenderingControl2

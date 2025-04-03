@@ -92,16 +92,15 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="context"></param>
         /// <param name="url"></param>
+        /// <param name="status"></param>
         /// <param name="exception"></param>
-        /// <param name="handled"></param>
-        protected override void HandleContext(HttpListenerContext context, string url, out Exception exception, out bool handled)
+        protected override void HandleContext(HttpListenerContext context, string url, out UPnPRequestFailedStatus status, out Exception exception)
         {
             if (context is null)
             {
-                exception = new ArgumentNullException(nameof(context));
-                handled = true;
+                throw new ArgumentNullException(nameof(context));
             }
-            else if (_eventSubscribers.TryGetValue(url, out Tuple<UPnPEventRaisedCallback, object> callback))
+            if (_eventSubscribers.TryGetValue(url, out Tuple<UPnPEventRaisedCallback, object> callback))
             {
                 try
                 {
@@ -125,18 +124,19 @@ namespace Honoo.Net
                         message = new UPnPUnknownEventMessage(url, lastChangeString);
                     }
                     callback?.Item1?.Invoke(this, message, callback.Item2);
+                    status = UPnPRequestFailedStatus.None;
                     exception = null;
                 }
                 catch (Exception ex)
                 {
+                    status = UPnPRequestFailedStatus.EventAnalyzeFailed;
                     exception = ex;
                 }
-                handled = true;
             }
             else
             {
+                status = UPnPRequestFailedStatus.Unhandled;
                 exception = null;
-                handled = false;
             }
         }
 
@@ -155,7 +155,7 @@ namespace Honoo.Net
                     {
                         property.Attributes.Add(att.Name.LocalName, att.Value);
                     }
-                    instance.Properties.Add(property.PropertyName, property);
+                    instance.Properties.Add(property.Name, property);
                 }
                 message.Instances.Add(instanceID, instance);
             }

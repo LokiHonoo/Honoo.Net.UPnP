@@ -19,6 +19,9 @@ namespace Honoo.Net
         public const string UPNP_ROOT_DEVICE = "upnp:rootdevice";
 
         /// <summary></summary>
+        public const string URN_BILIBILI_SERVICE_NIRVANA_CONTROL_3 = "urn:app-bilibili-com:service:NirvanaControl:3";
+
+        /// <summary></summary>
         public const string URN_MICROSOFT_SERVICE_OS_INFO_1 = "urn:schemas-microsoft-com:service:OSInfo:1";
 
         /// <summary></summary>

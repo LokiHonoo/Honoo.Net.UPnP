@@ -6,13 +6,13 @@
     public interface IUPnPEventMessage
     {
         /// <summary>
-        /// Event subscription url.
-        /// </summary>
-        string EventSubscriptionUrl { get; }
-
-        /// <summary>
         /// Event LastChange xml string.
         /// </summary>
-        string EventXmlString { get; }
+        string LastChangeXml { get; }
+
+        /// <summary>
+        /// Event subscription url.
+        /// </summary>
+        string SubscriptionUrl { get; }
     }
 }

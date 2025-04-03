@@ -154,17 +154,16 @@ namespace Honoo.Net
         /// </summary>
         /// <param name="context"></param>
         /// <param name="url"></param>
+        /// <param name="status"></param>
         /// <param name="exception"></param>
-        /// <param name="handled"></param>
-        protected override void HandleContext(HttpListenerContext context, string url, out Exception exception, out bool handled)
+        protected override void HandleContext(HttpListenerContext context, string url, out UPnPRequestFailedStatus status, out Exception exception)
         {
-            base.HandleContext(context, url, out exception, out handled);
-            if (!handled)
+            base.HandleContext(context, url, out status, out exception);
+            if (status == UPnPRequestFailedStatus.Unhandled)
             {
                 if (context is null)
                 {
-                    exception = new ArgumentNullException(nameof(context));
-                    handled = true;
+                    throw new ArgumentNullException(nameof(context));
                 }
                 else if (_media.TryGetValue(url, out Tuple<bool, string, Stream> data))
                 {
@@ -182,27 +181,21 @@ namespace Honoo.Net
                                 Transport(media, range, context.Response);
                             }
                         }
+                        context.Response.OutputStream.Flush();
+                        context.Response.OutputStream.Close();
+                        status = UPnPRequestFailedStatus.None;
                         exception = null;
                     }
                     catch (Exception ex)
                     {
+                        status = UPnPRequestFailedStatus.MediaTransportFailed;
                         exception = ex;
                     }
-                    try
-                    {
-                        context.Response.OutputStream.Flush();
-                        context.Response.OutputStream.Close();
-                    }
-                    catch
-                    {
-                        // exception = null;
-                    }
-                    handled = true;
                 }
                 else
                 {
+                    status = UPnPRequestFailedStatus.Unhandled;
                     exception = null;
-                    handled = false;
                 }
             }
         }
