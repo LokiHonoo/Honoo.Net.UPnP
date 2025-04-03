@@ -19,7 +19,7 @@ Simple UPnP. Provides port mapping, DLNA e.g..
 PortMapping v1 - implemented.  
 PortMapping v2 - implemented.  
 DLNA v1 - implemented.  
-DLNA v2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
+DLNA v2 - implemented but GetStateVariables(), SetStateVariables() has some bugs maybe. 
 DLNA v3 - 0 %.
 
 ## GUIDE
@@ -141,11 +141,11 @@ private static void UPnPAVTEventRaisedCallback(UPnPServer sender, UPnPEventMessa
 **Features* WANIPConnection:2 - implemented.  
 **Features* WANPPPConnection:1 - implemented.  
 **Features* AVTransport:1 - implemented.  
-**Features* AVTransport:2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
+**Features* AVTransport:2 - implemented but GetStateVariables(), SetStateVariables() has some bugs maybe.  
 **Features* ConnectionManager:1 - implemented.  
 **Features* ConnectionManager:2 - implemented.  
 **Features* RenderingControl:1 - implemented.  
-**Features* RenderingControl:2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
+**Features* RenderingControl:2 - implemented but GetStateVariables(), SetStateVariables() has some bugs maybe.  
 
 ## LICENSE
 

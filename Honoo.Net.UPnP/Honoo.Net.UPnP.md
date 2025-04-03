@@ -13,7 +13,7 @@ Simple UPnP. Provides port mapping, DLNA e.g..
 PortMapping v1 - implemented.  
 PortMapping v2 - implemented.  
 DLNA v1 - implemented.  
-DLNA v2 - implemented but GetStateVariables(), SetStateVariables() maybe has some bug.  
+DLNA v2 - implemented but GetStateVariables(), SetStateVariables() has some bugs maybe.
 DLNA v3 - 0 %.
 
 ## GUIDE
