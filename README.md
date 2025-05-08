@@ -94,9 +94,9 @@ private static void TestDlna()
 
     serviceAV.Play(0, "1");
     Thread.Sleep(2000);
-    serviceRC.SetVolume(0, "Master", 50); // Device maybe not supported
+    serviceRC.SetVolume(0, "Master", 50); // Device not supported maybe.
     Thread.Sleep(2000);
-    serviceRC.SetVolume(0, "Master", 14); // Device maybe not supported
+    serviceRC.SetVolume(0, "Master", 14); // Device not supported maybe.
 
     Console.ReadKey(true);
     serviceAV.Stop(0);
